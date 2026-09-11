@@ -1,6 +1,6 @@
 # Filament Account Switcher
 
-![Filament Account Switcher](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/art/banner.jpg)
+![Filament Account Switcher](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/banner.jpg)
 
 Switch between accounts in a Filament panel without signing out — safely, in production. Free and open source (MIT).
 

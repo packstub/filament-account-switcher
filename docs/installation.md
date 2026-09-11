@@ -121,8 +121,8 @@ The action is hidden for records the current user may not impersonate.
 3. Assign the sub-account fewer permissions (with your roles package of choice).
 4. Use the **Switch to** button next to the user menu to move between the two. Switching to the sub-account is one click; switching back to the full account asks for its password.
 
-![The user menu with the Linked accounts item](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/user-menu.png)
+![The user menu with the Linked accounts item](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/user-menu.png)
 
-![The Linked accounts page after creating a sub-account](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/linked-accounts-page.png)
+![The Linked accounts page after creating a sub-account](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/linked-accounts-page.png)
 
 Continue with [Linked accounts](linked-accounts.md).

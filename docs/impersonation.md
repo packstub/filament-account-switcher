@@ -4,7 +4,7 @@ Sign in as another user to see what they see, then switch back. Impersonation is
 
 ## The action
 
-![The Impersonate icon button on each row of the users table](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/impersonate-action.png)
+![The Impersonate icon button on each row of the users table](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonate-action.png)
 
 `ImpersonateAction` works as a table record action or a page header action:
 
@@ -64,7 +64,7 @@ AccountSwitcherPlugin::make()
 
 ## The banner
 
-![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/impersonation-banner.png)
+![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
 While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button. It renders at the bottom of every panel page; move it to the top or switch to the light style:
 
@@ -73,7 +73,7 @@ AccountSwitcherPlugin::make()
     ->banner(position: 'top', style: 'light')
 ```
 
-![The banner at the top of the page in the light style](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/impersonation-banner-top-light.png)
+![The banner at the top of the page in the light style](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner-top-light.png)
 
 To restyle it completely, publish the views and edit `resources/views/vendor/packstub-account-switcher/banner.blade.php`:
 
