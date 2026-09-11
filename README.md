@@ -2,7 +2,7 @@
 
 <div class="filament-hidden">
 
-![Filament Account Switcher — switch accounts, never sign out](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/art/banner.jpg)
+![Filament Account Switcher — switch accounts, never sign out](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/banner.jpg)
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/packstub/filament-account-switcher.svg?style=flat-square)](https://packagist.org/packages/packstub/filament-account-switcher)
 [![Tests](https://img.shields.io/github/actions/workflow/status/packstub/filament-account-switcher/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/packstub/filament-account-switcher/actions/workflows/tests.yml)
@@ -71,15 +71,15 @@ Full walkthrough: [Installation](https://packstub.dev/docs/filament-account-swit
 
 Link the accounts one person owns. A **Switch to** menu next to the user menu lists them with their label and e-mail.
 
-![The Switch to menu listing the linked accounts](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/switch-to-menu.png)
+![The Switch to menu listing the linked accounts](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/switch-to-menu.png)
 
 Switching *down* to a lower-privilege account is one click. Switching *up* asks for the **target** account's password, so a compromised daily session can never reach the admin account on its own.
 
-![Switching up to the admin account asks for its password](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/switch-password-modal.png)
+![Switching up to the admin account asks for its password](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/switch-password-modal.png)
 
 The **Linked accounts** page (in the user menu) links an existing account, creates a sub-account, renames links and sets the per-link password rule.
 
-![The Linked accounts page](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/linked-accounts-page.png)
+![The Linked accounts page](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/linked-accounts-page.png)
 
 ```php
 // Or link programmatically — one click down, password up
@@ -100,11 +100,11 @@ use Packstub\AccountSwitcher\Filament\Actions\ImpersonateAction;
 ])
 ```
 
-![The Impersonate action on each row of the users table](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/impersonate-action.png)
+![The Impersonate action on each row of the users table](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonate-action.png)
 
 While impersonating, a banner stays visible on every page with a **Switch back** button.
 
-![The impersonation banner with a Switch back button](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/impersonation-banner.png)
+![The impersonation banner with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
 Read more: [Impersonation](https://packstub.dev/docs/filament-account-switcher/impersonation).
 
@@ -117,7 +117,7 @@ AccountSwitcherPlugin::make()
     ->developerLogins(['admin@example.com', 'user@example.com'])
 ```
 
-![Developer login buttons under the login form](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/developer-logins.png)
+![Developer login buttons under the login form](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/developer-logins.png)
 
 Read more: [Developer logins](https://packstub.dev/docs/filament-account-switcher/developer-logins).
 

@@ -6,11 +6,11 @@ Linked accounts let one person hold several accounts and move between them witho
 
 Once you have at least one linked account, a **Switch to** button appears next to the user menu. It lists every linked account with its label (or name) and e-mail, plus a link to the Linked accounts page.
 
-![The "Switch to" menu listing the linked Daily and Support accounts](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/switch-to-menu.png)
+![The "Switch to" menu listing the linked Daily and Support accounts](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/switch-to-menu.png)
 
 Choosing an account either switches immediately or opens a small modal asking for **that account's password**, depending on the link's *Ask for password when switching* setting.
 
-![Switching up to the admin account asks for the admin password](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/switch-password-modal.png)
+![Switching up to the admin account asks for the admin password](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/switch-password-modal.png)
 
 The menu is hidden while impersonating — see [Security](security.md#no-escalation-through-impersonation).
 
@@ -25,7 +25,7 @@ AccountSwitcherPlugin::make()
 
 ## The Linked accounts page
 
-![The Linked accounts page with two linked accounts and the Link / Create actions](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/linked-accounts-page.png)
+![The Linked accounts page with two linked accounts and the Link / Create actions](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/linked-accounts-page.png)
 
 Reachable from the user menu (**Linked accounts**) or at `/{panel}/linked-accounts`. It lists the accounts linked to the one you're signed in with, and offers:
 
@@ -63,7 +63,7 @@ AccountSwitcherPlugin::make()
 
 By default the plugin adds a **Linked accounts** item to the user menu:
 
-![The Linked accounts item in the user menu](https://raw.githubusercontent.com/packstub/filament-account-switcher/main/docs/images/user-menu.png)
+![The Linked accounts item in the user menu](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/user-menu.png)
 
 ```php
 AccountSwitcherPlugin::make()
