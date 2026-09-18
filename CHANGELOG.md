@@ -2,6 +2,13 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+### Changed
+
+- **Leaner dist archive**: `composer require` downloads what an install runs; the changelog (read it on GitHub, or in each release's notes), `pint.json` and the other development files stay in the repository (`.gitattributes` `export-ignore`).
+- **Package health in CI** (`.github/workflows/package-health.yml`, `.github/scripts/package-health.sh`): every push checks what the package health score on filamentphp.com checks (Powered by [Plumb](https://plumbphp.dev/packstub/filament-account-switcher)) — a lean dist archive, no `composer.lock` in it, actions pinned to a commit SHA, Dependabot with a cooldown for every ecosystem that has a lockfile, a security policy — on the commit, before a tag ships it. A weekly run reads the published score and fails below 100.
+
 ## 4.0.3 — 2026-09-03
 
 ### Fixed
