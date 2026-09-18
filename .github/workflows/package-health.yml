@@ -1,0 +1,32 @@
+name: Package health
+
+# The checks behind the package health score on filamentphp.com (Powered by Plumb, https://plumbphp.dev/checks),
+# on every commit; the published score itself once a week (Plumb scans daily and asks for cached reads).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Repository checks
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        run: bash .github/scripts/package-health.sh
+
+      - name: Repository checks and the published score
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: bash .github/scripts/package-health.sh --published
