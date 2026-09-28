@@ -19,6 +19,7 @@ use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Packstub\AccountSwitcher\AccountSwitcherServiceProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\AdminPanelProvider;
+use Packstub\AccountSwitcher\Tests\Fixtures\TenantPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\User;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 
@@ -51,6 +52,7 @@ abstract class TestCase extends Orchestra
             LivewireServiceProvider::class,
             AccountSwitcherServiceProvider::class,
             AdminPanelProvider::class,
+            TenantPanelProvider::class,
         ];
     }
 
@@ -78,6 +80,17 @@ abstract class TestCase extends Orchestra
             $table->boolean('can_access_panel')->default(true);
             $table->rememberToken();
             $table->timestamps();
+        });
+
+        Schema::create('teams', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('team_user', function (Blueprint $table): void {
+            $table->foreignId('team_id');
+            $table->foreignId('user_id');
         });
 
         foreach (['create_linked_accounts_table', 'create_account_switches_table'] as $migration) {
