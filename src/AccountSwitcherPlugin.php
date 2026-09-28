@@ -267,6 +267,26 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
+     * URL of the linked accounts page, or null where it cannot be reached. In a
+     * tenant-aware panel the page lives under a tenant, so there is no URL on
+     * tenant-less pages such as tenant registration.
+     */
+    public function getLinkedAccountsUrl(): ?string
+    {
+        if (! $this->hasLinkedAccounts()) {
+            return null;
+        }
+
+        if (Filament::hasTenancy() && ! Filament::getTenant()) {
+            return null;
+        }
+
+        $page = $this->linkedAccountsPage;
+
+        return $page::canAccess() ? $page::getUrl() : null;
+    }
+
+    /**
      * @return Collection<int, Authenticatable>
      */
     public function resolveDeveloperLoginUsers(): Collection
@@ -299,8 +319,8 @@ class AccountSwitcherPlugin implements Plugin
                     'linked-accounts' => Action::make('linked-accounts')
                         ->label(fn (): string => __('packstub-account-switcher::account-switcher.linked_accounts.title'))
                         ->icon('heroicon-o-users')
-                        ->url(fn (): string => $this->linkedAccountsPage::getUrl())
-                        ->visible(fn (): bool => app(AccountSwitcher::class)->supportsLinkedAccounts(Filament::auth()->user())),
+                        ->url(fn (): ?string => $this->getLinkedAccountsUrl())
+                        ->visible(fn (): bool => $this->getLinkedAccountsUrl() !== null),
                 ]);
             }
         }

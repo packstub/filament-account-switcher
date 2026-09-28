@@ -108,15 +108,7 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
 
     public function getManageUrl(): ?string
     {
-        $plugin = app(AccountSwitcher::class)->plugin();
-
-        if (! $plugin?->hasLinkedAccounts()) {
-            return null;
-        }
-
-        $page = $plugin->getLinkedAccountsPage();
-
-        return $page::canAccess() ? $page::getUrl() : null;
+        return app(AccountSwitcher::class)->plugin()?->getLinkedAccountsUrl();
     }
 
     public function accountLabel(?Model $account): string
