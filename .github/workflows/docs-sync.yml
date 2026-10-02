@@ -53,5 +53,11 @@ jobs:
             echo "Storefront docs already up to date."
           else
             git commit -m "docs: sync filament-account-switcher from packstub/filament-account-switcher@${GITHUB_SHA::7}"
-            git push origin main
+            # Other plugins' docs-sync runs and the store's own workflows push to main too: replay on top and retry.
+            for attempt in 1 2 3 4 5; do
+              git push origin main && break
+              [ "$attempt" -lt 5 ] || exit 1
+              sleep $((attempt * 5))
+              git pull --rebase origin main
+            done
           fi
