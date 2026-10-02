@@ -8,14 +8,13 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 - Packagist: [packstub/filament-account-switcher](https://packagist.org/packages/packstub/filament-account-switcher)
 - Support: [GitHub issues](https://github.com/packstub/filament-account-switcher/issues)
 
-## What you get
+## Features
 
-| Feature | What it means for you |
-| --- | --- |
-| **Linked accounts** | Do daily work from a low-privilege account and switch to your full admin account only when you need it. A "Switch to" menu in the topbar lists the accounts you've linked. Switching *up* asks for that account's password; switching *down* is one click. |
-| **Impersonation** | `ImpersonateAction` for your user resource, a persistent banner with "Switch back", and `canImpersonate()` / `canBeImpersonated()` hooks on your model. |
-| **Developer logins** | One-click sign-in buttons on the login page for the accounts you seed locally — never rendered outside the environments you allow. |
-| **Audit trail** | Every switch is recorded with who, to whom, why, panel, IP and user agent, and fires `AccountSwitching` / `AccountSwitched` events. |
+- **[Linked accounts](linked-accounts.md)**: work from a low-privilege account and switch up to admin only when you need it.
+- **[Impersonation](impersonation.md)**: an action for your users table, a banner with Switch back, rules on your model.
+- **[Developer logins](developer-logins.md)**: one-click sign-in buttons for your seeded accounts, only in the environments you allow.
+- **[Audit trail](configuration.md#the-switch-log)**: every switch logged with who, why and from where, plus events.
+- **[Security](security.md)**: switching up asks for the target account's password; each feature has a written threat model.
 
 ## Guides
 

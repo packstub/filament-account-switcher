@@ -17,12 +17,12 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 
 ## Features
 
-- **[Linked accounts](#linked-accounts)** — work from a low-privilege account day to day and switch to your full admin account only when you need it. Switching *up* asks for that account's password; switching *down* is one click.
-- **[Impersonation](#impersonation)** — an `ImpersonateAction` for your user resource, a persistent banner with a *Switch back* button, and authorization hooks on your model.
-- **[Developer logins](#developer-logins)** — one-click sign-in buttons on the login page for the accounts you seed locally, never rendered outside the environments you allow.
-- **[Audit trail](https://packstub.dev/docs/filament-account-switcher/configuration#the-switch-log)** — every switch is recorded (who, to whom, why, panel, IP, user agent) and fires `AccountSwitching` / `AccountSwitched` events.
-- **[Fluent plugin API](#configuration)** — enable each feature per panel, add your own authorization rules, move the banner, replace the Linked accounts page.
-- **Dark mode ready** and **translatable** — built from Filament components, with every string in a language file.
+- **[Linked accounts](#linked-accounts)**: work from a low-privilege account and switch up to admin only when you need it.
+- **[Impersonation](#impersonation)**: an action for your users table, a banner with Switch back, rules on your model.
+- **[Developer logins](#developer-logins)**: one-click sign-in buttons for your seeded accounts, only in the environments you allow.
+- **[Audit trail](https://packstub.dev/docs/filament-account-switcher/configuration#the-switch-log)**: every switch logged with who, why and from where, plus events.
+- **[Configurable per panel](#configuration)**: turn each feature on or off, add your own rules, move the banner.
+- **Dark mode and translations**: built from Filament components, every string in a language file.
 
 Formerly `xlite-dev/filament-impersonate` — see the [upgrade guide](https://github.com/packstub/filament-account-switcher/blob/main/UPGRADE.md).
 

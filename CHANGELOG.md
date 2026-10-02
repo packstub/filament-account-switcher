@@ -2,6 +2,12 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+### Changed
+
+- **Docs**: a shorter Features list in the README and on the docs index, one line per area.
+
 ## 4.0.4 — 2026-09-28
 
 ### Changed
