@@ -35,6 +35,12 @@ jobs:
         run: |
           mkdir -p /tmp/store/resources/docs/filament-account-switcher/1.x
           rsync -a --delete docs/ /tmp/store/resources/docs/filament-account-switcher/1.x/
+          # The screenshots also go where the store keeps published images, which packstub:art:publish mirrors
+          # to packstub/art (the URLs the README and the docs link).
+          if [ -d docs/images ]; then
+            mkdir -p /tmp/store/public/images/plugins/filament-account-switcher/docs
+            rsync -a --delete docs/images/ /tmp/store/public/images/plugins/filament-account-switcher/docs/
+          fi
 
       - name: Commit and push if changed
         working-directory: /tmp/store
@@ -42,6 +48,7 @@ jobs:
           git config user.name "packstub-bot"
           git config user.email "support@packstub.dev"
           git add -A resources/docs/filament-account-switcher
+          if [ -d public/images/plugins/filament-account-switcher/docs ]; then git add -A public/images/plugins/filament-account-switcher/docs; fi
           if git diff --cached --quiet; then
             echo "Storefront docs already up to date."
           else
