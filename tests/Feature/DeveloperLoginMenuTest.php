@@ -36,11 +36,24 @@ it('filters the listed accounts with the search box once there are enough of the
         ->assertSee('No account matches.');
 });
 
+it('keeps the search box behind a toggle until it is opened', function (): void {
+    foreach (range(1, 6) as $i) {
+        createUser(['email' => "dev-user{$i}@example.com", 'name' => "Dev {$i}"]);
+    }
+
+    livewire(AccountSwitcherMenu::class)
+        ->assertSeeHtml('fi-account-switcher-developer-logins-search-toggle')
+        ->assertSeeHtml('x-data="{ searchOpen: false }"')
+        ->set('developerLoginSearch', 'dev 6')
+        ->assertSeeHtml('x-data="{ searchOpen: true }"');
+});
+
 it('shows no search box for a short list', function (): void {
     createUser(['email' => 'dev-alice@example.com']);
 
     livewire(AccountSwitcherMenu::class)
-        ->assertDontSee('Search accounts');
+        ->assertDontSee('Search accounts')
+        ->assertDontSeeHtml('fi-account-switcher-developer-logins-search-toggle');
 });
 
 it('offers the groups as tags and filters by them', function (): void {

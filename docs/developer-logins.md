@@ -43,7 +43,7 @@ The menu shows the current account highlighted, and a switch made from it stays 
 
 ### Many accounts
 
-With six or more developer logins the menu adds a search box and the list scrolls. The search matches the label, the tag, the name, the e-mail and the username.
+With six or more developer logins the list scrolls and a search icon appears in the section header; it opens and focuses a search box (Escape clears and closes it). The search matches the label, the tag, the name, the e-mail and the username.
 
 ### Tags
 

@@ -2,10 +2,11 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
-## Unreleased
+## 4.2.1 — 2026-10-15
 
 ### Changed
 
+- **Menu search behind a toggle**: the search box no longer takes room above a short list. A search icon in the "Developer logins" header opens and focuses it; Escape clears and closes it. It opens by itself while a search is active.
 - **Docs**: the search-resolver examples use `whereLike(..., caseSensitive: false)` instead of a PostgreSQL-only `ilike`.
 
 ## 4.2.0 — 2026-10-15
