@@ -2,6 +2,12 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+### Changed
+
+- **Docs**: the search-resolver examples use `whereLike(..., caseSensitive: false)` instead of a PostgreSQL-only `ilike`.
+
 ## 4.2.0 — 2026-10-15
 
 ### Added

@@ -26,7 +26,7 @@ AccountSwitcherPlugin::make()
     ->developerLoginsWhen(fn (): bool => app()->environment('local') || Filament::auth()->check())
     ->developerLoginLabelUsing(fn (User $user): string => "{$user->role} ({$user->username})")
     ->developerLoginGroupUsing(fn (User $user): ?string => $user->role)
-    ->developerLoginSearchUsing(fn (string $search) => User::query()->where('email', 'like', "%{$search}%")->limit(20)->get())
+    ->developerLoginSearchUsing(fn (string $search) => User::query()->whereLike('email', "%{$search}%", caseSensitive: false)->limit(20)->get())
     ->developerLoginRedirectTo('/app')
 
     // Where to land after any switch (string or Closure(Authenticatable, ?SwitchReason): string)

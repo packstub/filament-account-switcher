@@ -64,13 +64,13 @@ AccountSwitcherPlugin::make()
     ->developerLoginsInMenu()
     ->developerLoginSearchUsing(fn (string $search) => User::query()
         ->where(fn ($query) => $query
-            ->where('name', 'ilike', "%{$search}%")
-            ->orWhere('email', 'ilike', "%{$search}%"))
+            ->whereLike('name', "%{$search}%", caseSensitive: false)
+            ->orWhereLike('email', "%{$search}%", caseSensitive: false))
         ->limit(20)
         ->get())
 ```
 
-Keep the result small. A switch is accepted only for an account the *current* search returned, and the resolver is never consulted outside the [gates](#how-its-gated) below.
+`whereLike(..., caseSensitive: false)` is case-insensitive on every database Laravel supports (`ILIKE` on PostgreSQL, `LOWER(...) LIKE` elsewhere). Keep the result small. A switch is accepted only for an account the *current* search returned, and the resolver is never consulted outside the [gates](#how-its-gated) below.
 
 ## Labels
 
