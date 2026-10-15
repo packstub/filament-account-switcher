@@ -21,11 +21,21 @@ AccountSwitcherPlugin::make()
     // Sub-account creation
     ->createSubAccountUsing(fn (array $data, User $owner): User => User::create($data))
 
-    // Where to land after any switch (string or Closure(Authenticatable): string)
-    ->redirectTo(fn (User $user): string => $user->is_admin ? '/admin' : '/app')
+    // Developer logins: in the switcher menu too, an extra runtime gate, labels, their own landing page
+    ->developerLoginsInMenu()
+    ->developerLoginsWhen(fn (): bool => app()->environment('local') || Filament::auth()->check())
+    ->developerLoginLabelUsing(fn (User $user): string => "{$user->role} ({$user->username})")
+    ->developerLoginRedirectTo('/app')
 
-    // Audit log on/off for this panel (defaults to the config value)
+    // Where to land after any switch (string or Closure(Authenticatable, ?SwitchReason): string)
+    ->redirectTo(fn (User $user, ?SwitchReason $reason): string => $user->is_admin ? '/admin' : '/app')
+
+    // After a switch, send a 403/404 landing page to a panel the account may access (on by default)
+    ->fallbackToAccessiblePanel(true)
+
+    // Audit log on/off for this panel (defaults to the config value), and extra columns for its rows
     ->logSwitches(true)
+    ->switchLogContextUsing(fn (SwitchReason $reason): array => ['tenant' => tenant('id')])
 
     // UI placement
     ->switcherRenderHook(PanelsRenderHook::USER_MENU_BEFORE)
@@ -53,12 +63,14 @@ Each accepts a `Closure` for runtime decisions, e.g. `->impersonation(fn (): boo
 
 After a switch the plugin sends the browser to:
 
-1. `redirectTo()` if set (string, or a closure receiving the target user), else
+1. `redirectTo()` if set (string, or a closure receiving the target user and the `SwitchReason`), else
 2. the **current panel** if the target user may access it, else
 3. the **first panel** the target user may access, else
 4. the current panel's URL (Filament will then show 403).
 
 "May access" means `canAccessPanel()` for `FilamentUser` models, or "local environment" for other models — the same rule Filament's own `Authenticate` middleware applies.
+
+Developer logins have their own `developerLoginRedirectTo()`; see [Developer logins](developer-logins.md#where-it-lands). And whatever the target, if the landing page answers 403 or 404 the plugin redirects once more, to a panel the account may access — see [Landing on a hidden page](impersonation.md#landing-on-a-hidden-page).
 
 ## The config file
 
@@ -115,9 +127,38 @@ Every switch writes one row to `account_switches`:
 | `reason` | `impersonation`, `impersonation_ended`, `linked_account`, `developer_login` (`SwitchReason` enum) |
 | `panel`, `guard` | Where it happened |
 | `ip_address`, `user_agent` | From the request |
+| `context` | Extra data you attach (JSON, nullable) — see below |
 | `created_at` | When |
 
 Query it with the `Packstub\AccountSwitcher\Models\AccountSwitch` model (`fromUser()` / `toUser()` relationships), or build a Filament resource on it for an "Account activity" page. Turn logging off globally with `log_switches` or per panel with `->logSwitches(false)`.
+
+### Context
+
+Attach what the row cannot infer — the tenant, a ticket number, the client app. App-wide, from a service provider:
+
+```php
+use Packstub\AccountSwitcher\AccountSwitcher;
+
+AccountSwitcher::resolveLogContextUsing(fn (SwitchReason $reason): array => [
+    'tenant' => tenant()?->getTenantKey(),
+]);
+```
+
+Per panel, merged over the app-wide context: `->switchLogContextUsing(fn (SwitchReason $reason): array => [...])`.
+
+Installs that predate 4.1 need the column: `php artisan vendor:publish --tag="packstub-account-switcher-migrations"` publishes `add_context_to_account_switches_table`, then `php artisan migrate`.
+
+### Switches made elsewhere
+
+Some switches never go through the plugin — a tenancy package's impersonation token redeemed on another domain, an SSO hand-off. Log them in the same table so the audit trail stays complete:
+
+```php
+use Packstub\AccountSwitcher\Facades\AccountSwitcher;
+
+AccountSwitcher::log(from: $centralUser, to: $tenantUser, reason: SwitchReason::Impersonation, context: ['tenant' => $tenant->id]);
+```
+
+It honours `log_switches` and the panel's `->logSwitches()` and returns the row, or `null` when logging is off.
 
 ## Events
 
@@ -144,8 +185,9 @@ Event::listen(AccountSwitched::class, function (AccountSwitched $event): void {
 | --- | --- |
 | `canImpersonate($by, $target)` / `impersonate($target)` / `isImpersonating()` / `impersonator()` / `stopImpersonating()` | Impersonation |
 | `canSwitchToLinkedAccount($from, $to)` / `requiresPassword($from, $to)` / `switchToLinkedAccount($to, $password)` | Linked accounts |
-| `developerLoginsEnabled()` / `developerLoginUsers()` / `developerLogin($user)` | Developer logins |
-| `redirectUrlFor($user)` / `accessiblePanel($user)` | Panel resolution |
+| `developerLoginsEnabled()` / `developerLoginUsers()` / `developerLogin($user)` / `developerLoginRedirectUrl($user)` | Developer logins |
+| `redirectUrlFor($user, $reason)` / `accessiblePanel($user)` / `redirectWhenPageIsInaccessible($exception, $request)` | Panel resolution and the landing-page fallback |
+| `log($from, $to, $reason, $context)` / `AccountSwitcher::resolveLogContextUsing($callback)` | The switch log |
 | `plugin()` / `userModel()` | Current panel's plugin instance; resolved user model class |
 
 Denied operations throw `Packstub\AccountSwitcher\Exceptions\AccountSwitchDenied` (an `AuthorizationException`).

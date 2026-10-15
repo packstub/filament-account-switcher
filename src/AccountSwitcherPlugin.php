@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use Packstub\AccountSwitcher\Enums\SwitchReason;
 use Packstub\AccountSwitcher\Filament\Pages\LinkedAccounts;
 use Packstub\AccountSwitcher\Http\Controllers\DeveloperLoginController;
 use Packstub\AccountSwitcher\Http\Controllers\SwitchBackController;
@@ -30,6 +31,18 @@ class AccountSwitcherPlugin implements Plugin
 
     /** @var Closure | array<int, string> | null */
     protected Closure|array|null $developerLoginUsers = null;
+
+    protected bool|Closure $developerLoginsInMenu = false;
+
+    protected ?Closure $developerLoginsWhen = null;
+
+    protected ?Closure $developerLoginLabelUsing = null;
+
+    protected string|Closure|null $developerLoginRedirectTo = null;
+
+    protected bool|Closure $fallbackToAccessiblePanel = true;
+
+    protected ?Closure $switchLogContextUsing = null;
 
     protected ?Closure $canImpersonateUsing = null;
 
@@ -113,6 +126,73 @@ class AccountSwitcherPlugin implements Plugin
 
         $this->developerLogins = $users !== null;
         $this->developerLoginUsers = $users;
+
+        return $this;
+    }
+
+    /**
+     * Also list the developer logins in the "Switch to" menu, so a signed-in
+     * developer can hop between the seeded accounts without signing out.
+     */
+    public function developerLoginsInMenu(bool|Closure $enabled = true): static
+    {
+        $this->developerLoginsInMenu = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * Runtime gate on top of the environment list, checked before the buttons
+     * render and again when a login is posted: fn (): bool
+     */
+    public function developerLoginsWhen(?Closure $callback): static
+    {
+        $this->developerLoginsWhen = $callback;
+
+        return $this;
+    }
+
+    /**
+     * How a developer login is labelled on the login page and in the menu:
+     * fn (Authenticatable $user): string. Defaults to Filament's user name.
+     */
+    public function developerLoginLabelUsing(?Closure $callback): static
+    {
+        $this->developerLoginLabelUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Where a developer login lands, when it should differ from redirectTo():
+     * string or fn (Authenticatable $user): string. From the menu the default
+     * is the page the switch was made on.
+     */
+    public function developerLoginRedirectTo(string|Closure|null $url): static
+    {
+        $this->developerLoginRedirectTo = $url;
+
+        return $this;
+    }
+
+    /**
+     * After a switch, answer a 403 or 404 on the landing page with a redirect
+     * to a panel the new account may access (on by default).
+     */
+    public function fallbackToAccessiblePanel(bool|Closure $enabled = true): static
+    {
+        $this->fallbackToAccessiblePanel = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * Extra data stored with every switch-log row written from this panel,
+     * e.g. the current tenant: fn (SwitchReason $reason): array
+     */
+    public function switchLogContextUsing(?Closure $callback): static
+    {
+        $this->switchLogContextUsing = $callback;
 
         return $this;
     }
@@ -212,6 +292,43 @@ class AccountSwitcherPlugin implements Plugin
     public function hasDeveloperLogins(): bool
     {
         return (bool) value($this->developerLogins);
+    }
+
+    public function hasDeveloperLoginsInMenu(): bool
+    {
+        return (bool) value($this->developerLoginsInMenu);
+    }
+
+    public function evaluateDeveloperLoginsWhen(): bool
+    {
+        return $this->developerLoginsWhen === null || (bool) ($this->developerLoginsWhen)();
+    }
+
+    public function developerLoginLabel(Authenticatable $user): string
+    {
+        if ($this->developerLoginLabelUsing) {
+            return (string) ($this->developerLoginLabelUsing)($user);
+        }
+
+        return Filament::getUserName($user);
+    }
+
+    public function getDeveloperLoginRedirectTo(): string|Closure|null
+    {
+        return $this->developerLoginRedirectTo;
+    }
+
+    public function hasFallbackToAccessiblePanel(): bool
+    {
+        return (bool) value($this->fallbackToAccessiblePanel);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function evaluateSwitchLogContext(SwitchReason $reason): array
+    {
+        return $this->switchLogContextUsing ? (array) ($this->switchLogContextUsing)($reason) : [];
     }
 
     public function evaluateCanImpersonate(Authenticatable $by, Authenticatable $target): bool
@@ -343,7 +460,7 @@ class AccountSwitcherPlugin implements Plugin
 
     public function boot(Panel $panel): void
     {
-        if ($this->hasLinkedAccounts()) {
+        if ($this->hasLinkedAccounts() || $this->hasDeveloperLogins()) {
             FilamentView::registerRenderHook(
                 $this->switcherRenderHook,
                 fn (): string => $this->renderIfCurrentPanel($panel, fn (): string => Blade::render('@livewire(\'packstub-account-switcher-menu\')')),
@@ -376,7 +493,7 @@ class AccountSwitcherPlugin implements Plugin
                         return '';
                     }
 
-                    return view('packstub-account-switcher::developer-logins', ['users' => $users])->render();
+                    return view('packstub-account-switcher::developer-logins', ['users' => $users, 'plugin' => $this])->render();
                 }),
             );
         }

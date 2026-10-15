@@ -25,6 +25,6 @@ class DeveloperLoginController
 
         $switcher->developerLogin($user);
 
-        return redirect()->to($switcher->redirectUrlFor($user));
+        return redirect()->to($switcher->developerLoginRedirectUrl($user));
     }
 }

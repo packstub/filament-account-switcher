@@ -15,7 +15,7 @@
             <input type="hidden" name="user" value="{{ $user->getAuthIdentifier() }}">
 
             <x-filament::button type="submit" color="gray" outlined size="sm" icon="heroicon-o-arrow-right-end-on-rectangle" class="w-full" style="width: 100%; justify-content: center;">
-                {{ Filament::getUserName($user) }}
+                {{ $plugin->developerLoginLabel($user) }}
                 @if ($user->email ?? null)
                     <span style="opacity: .7;">({{ $user->email }})</span>
                 @endif

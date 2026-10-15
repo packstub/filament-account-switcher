@@ -26,6 +26,7 @@ it('is forbidden while impersonating', function (): void {
 
     $this->actingAs($admin);
     AccountSwitcher::impersonate($user);
+    session()->forget(Packstub\AccountSwitcher\AccountSwitcher::FALLBACK_URL_SESSION_KEY); // the landing-page fallback is covered in FallbackAfterSwitchTest
 
     $this->get(LinkedAccounts::getUrl())->assertForbidden();
 });

@@ -19,6 +19,7 @@ use Packstub\AccountSwitcher\Enums\SwitchReason;
  * @property string|null $guard
  * @property string|null $ip_address
  * @property string|null $user_agent
+ * @property array<string, mixed>|null $context
  * @property Carbon $created_at
  */
 class AccountSwitch extends Model
@@ -44,6 +45,7 @@ class AccountSwitch extends Model
     {
         return [
             'reason' => SwitchReason::class,
+            'context' => 'array',
             'created_at' => 'datetime',
         ];
     }

@@ -29,12 +29,42 @@ Other forms:
 ->developerLogins(false)
 ```
 
+## In the "Switch to" menu
+
+Signed-in developers can hop between the seeded accounts without signing out: list the developer logins in the switcher dropdown next to the user menu as well.
+
+```php
+AccountSwitcherPlugin::make()
+    ->developerLogins(fn () => User::query()->whereIn('username', ['superadmin', 'admin', 'employee'])->get())
+    ->developerLoginsInMenu()
+```
+
+The menu shows the current account highlighted, and a switch made from it stays on the page it was made on (see [Where it lands](#where-it-lands)). The menu is hidden while impersonating.
+
+## Labels
+
+By default a button or menu entry shows Filament's user name and the e-mail. To show what the account *is* instead of who it is:
+
+```php
+AccountSwitcherPlugin::make()
+    ->developerLoginLabelUsing(fn (User $user): string => "{$user->role_label} ({$user->username})")
+```
+
 ## How it's gated
 
-Two independent checks must pass before a button renders or a login is accepted:
+Three independent checks must pass before a button renders or a login is accepted:
 
 1. **Environment** — `config('packstub-account-switcher.developer_logins.environments')`, `['local']` by default. This is a hard ceiling: no panel setting can make the buttons appear in an environment that isn't listed.
 2. **Plugin** — `->developerLogins()` must be enabled on the panel, and the user must be in the resolved list.
+3. **`developerLoginsWhen()`** — an optional runtime gate, for a rule the environment list cannot express. A staging server that should let signed-in staff switch accounts but never advertise them on the login page:
+
+```php
+// config: 'environments' => ['local', 'staging']
+AccountSwitcherPlugin::make()
+    ->developerLogins([...])
+    ->developerLoginsInMenu()
+    ->developerLoginsWhen(fn (): bool => app()->environment('local') || Filament::auth()->check())
+```
 
 The login itself is a CSRF-protected `POST` to `filament.{panel}.account-switcher.developer-login`, throttled to 10 requests per minute. The controller re-runs both checks and returns 404 when either fails, so a stray button or a crafted request never signs anyone in.
 
@@ -47,7 +77,17 @@ The login itself is a CSRF-protected `POST` to `filament.{panel}.account-switche
 
 ## What happens on click
 
-The panel guard is re-authenticated as the chosen user, the session is regenerated, an [audit row](configuration.md#the-switch-log) with reason `SwitchReason::DeveloperLogin` is written, and the browser is redirected to a panel the user may access.
+The panel guard is re-authenticated as the chosen user, the session is regenerated, an [audit row](configuration.md#the-switch-log) with reason `SwitchReason::DeveloperLogin` is written, and the browser is redirected.
+
+## Where it lands
+
+- From the **login page**: `developerLoginRedirectTo()` if set, else the usual [switch redirect](configuration.md#redirects) (`redirectTo()` with `SwitchReason::DeveloperLogin`, else a panel the user may access).
+- From the **menu**: `developerLoginRedirectTo()` if set, else the page the switch was made on. If that page is hidden from the new account, the [landing-page fallback](impersonation.md#landing-on-a-hidden-page) takes it to the panel home.
+
+```php
+AccountSwitcherPlugin::make()
+    ->developerLoginRedirectTo(fn (User $user): string => $user->is_admin ? '/admin' : '/app')
+```
 
 ## Customizing the buttons
 

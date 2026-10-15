@@ -23,6 +23,7 @@ return [
 
     'developer_logins' => [
         'heading' => 'Developer logins (:environment)',
+        'menu_heading' => 'Developer logins',
     ],
 
     'linked_accounts' => [
