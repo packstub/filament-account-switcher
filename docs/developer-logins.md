@@ -41,6 +41,37 @@ AccountSwitcherPlugin::make()
 
 The menu shows the current account highlighted, and a switch made from it stays on the page it was made on (see [Where it lands](#where-it-lands)). The menu is hidden while impersonating.
 
+### Many accounts
+
+With six or more developer logins the menu adds a search box and the list scrolls. The search matches the label, the tag, the name, the e-mail and the username.
+
+### Tags
+
+Tag each account with what it is — its role, its team — and the menu offers the tags as filter chips; the login page groups its buttons under them:
+
+```php
+AccountSwitcherPlugin::make()
+    ->developerLoginGroupUsing(fn (User $user): ?string => $user->roles->first()?->name)
+```
+
+### Any account
+
+To sign in as *any* account, not only the listed ones, give the menu a search resolver. The listed accounts remain the default view (and the only ones offered on the login page); as soon as something is typed, the resolver's results replace them:
+
+```php
+AccountSwitcherPlugin::make()
+    ->developerLogins(fn () => User::query()->whereIn('username', ['superadmin', 'admin', 'employee'])->get())
+    ->developerLoginsInMenu()
+    ->developerLoginSearchUsing(fn (string $search) => User::query()
+        ->where(fn ($query) => $query
+            ->where('name', 'ilike', "%{$search}%")
+            ->orWhere('email', 'ilike', "%{$search}%"))
+        ->limit(20)
+        ->get())
+```
+
+Keep the result small. A switch is accepted only for an account the *current* search returned, and the resolver is never consulted outside the [gates](#how-its-gated) below.
+
 ## Labels
 
 By default a button or menu entry shows Filament's user name and the e-mail. To show what the account *is* instead of who it is:

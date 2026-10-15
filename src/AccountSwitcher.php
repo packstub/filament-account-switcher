@@ -305,19 +305,60 @@ class AccountSwitcher
     }
 
     /**
+     * The accounts matching a search in the menu: the plugin's search resolver when it has one,
+     * else the listed accounts filtered by the text. Empty outside the developer-login gates.
+     *
+     * @return Collection<int, Authenticatable>
+     */
+    public function searchDeveloperLogins(string $search): Collection
+    {
+        if (! $this->developerLoginsEnabled()) {
+            return collect();
+        }
+
+        $plugin = $this->plugin();
+
+        if ($plugin?->hasDeveloperLoginSearch()) {
+            return $plugin->searchDeveloperLogins($search);
+        }
+
+        $search = mb_strtolower(trim($search));
+
+        return $this->developerLoginUsers()
+            ->filter(fn (Authenticatable $user): bool => $search === '' || str_contains(mb_strtolower(implode(' ', array_filter([
+                $plugin?->developerLoginLabel($user),
+                $plugin?->developerLoginGroup($user),
+                $user->name ?? null,
+                $user->email ?? null,
+                $user->username ?? null,
+            ]))), $search))
+            ->values();
+    }
+
+    /**
+     * Whether the account may be signed into through the developer logins: listed, or found by the search resolver.
+     */
+    public function isDeveloperLoginAllowed(Authenticatable $user, ?string $search = null): bool
+    {
+        $matches = fn (Authenticatable $candidate): bool => (string) $candidate->getAuthIdentifier() === (string) $user->getAuthIdentifier();
+
+        if ($this->developerLoginUsers()->contains($matches)) {
+            return true;
+        }
+
+        return filled($search) && $this->searchDeveloperLogins($search)->contains($matches);
+    }
+
+    /**
      * @throws AccountSwitchDenied
      */
-    public function developerLogin(Authenticatable $user): void
+    public function developerLogin(Authenticatable $user, ?string $search = null): void
     {
         if (! $this->developerLoginsEnabled()) {
             throw AccountSwitchDenied::developerLoginsDisabled();
         }
 
-        $allowed = $this->developerLoginUsers()->contains(
-            fn (Authenticatable $candidate): bool => $candidate->getAuthIdentifier() === $user->getAuthIdentifier(),
-        );
-
-        if (! $allowed) {
+        if (! $this->isDeveloperLoginAllowed($user, $search)) {
             throw AccountSwitchDenied::developerLoginsDisabled();
         }
 
