@@ -25,6 +25,8 @@ AccountSwitcherPlugin::make()
     ->developerLoginsInMenu()
     ->developerLoginsWhen(fn (): bool => app()->environment('local') || Filament::auth()->check())
     ->developerLoginLabelUsing(fn (User $user): string => "{$user->role} ({$user->username})")
+    ->developerLoginGroupUsing(fn (User $user): ?string => $user->role)
+    ->developerLoginSearchUsing(fn (string $search) => User::query()->where('email', 'like', "%{$search}%")->limit(20)->get())
     ->developerLoginRedirectTo('/app')
 
     // Where to land after any switch (string or Closure(Authenticatable, ?SwitchReason): string)
@@ -185,7 +187,7 @@ Event::listen(AccountSwitched::class, function (AccountSwitched $event): void {
 | --- | --- |
 | `canImpersonate($by, $target)` / `impersonate($target)` / `isImpersonating()` / `impersonator()` / `stopImpersonating()` | Impersonation |
 | `canSwitchToLinkedAccount($from, $to)` / `requiresPassword($from, $to)` / `switchToLinkedAccount($to, $password)` | Linked accounts |
-| `developerLoginsEnabled()` / `developerLoginUsers()` / `developerLogin($user)` / `developerLoginRedirectUrl($user)` | Developer logins |
+| `developerLoginsEnabled()` / `developerLoginUsers()` / `searchDeveloperLogins($search)` / `developerLogin($user, $search)` / `developerLoginRedirectUrl($user)` | Developer logins |
 | `redirectUrlFor($user, $reason)` / `accessiblePanel($user)` / `redirectWhenPageIsInaccessible($exception, $request)` | Panel resolution and the landing-page fallback |
 | `log($from, $to, $reason, $context)` / `AccountSwitcher::resolveLogContextUsing($callback)` | The switch log |
 | `plugin()` / `userModel()` | Current panel's plugin instance; resolved user model class |

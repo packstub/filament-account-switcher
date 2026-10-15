@@ -24,6 +24,10 @@ return [
     'developer_logins' => [
         'heading' => 'Developer logins (:environment)',
         'menu_heading' => 'Developer logins',
+        'search' => 'Search accounts',
+        'search_any' => 'Search any account',
+        'all' => 'All',
+        'no_results' => 'No account matches.',
     ],
 
     'linked_accounts' => [

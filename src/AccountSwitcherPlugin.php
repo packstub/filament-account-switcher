@@ -38,6 +38,10 @@ class AccountSwitcherPlugin implements Plugin
 
     protected ?Closure $developerLoginLabelUsing = null;
 
+    protected ?Closure $developerLoginGroupUsing = null;
+
+    protected ?Closure $developerLoginSearchUsing = null;
+
     protected string|Closure|null $developerLoginRedirectTo = null;
 
     protected bool|Closure $fallbackToAccessiblePanel = true;
@@ -159,6 +163,28 @@ class AccountSwitcherPlugin implements Plugin
     public function developerLoginLabelUsing(?Closure $callback): static
     {
         $this->developerLoginLabelUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * A tag for each developer login (its role, its team, ...): fn (Authenticatable $user): ?string.
+     * The menu offers the tags as filters and the login page groups the buttons under them.
+     */
+    public function developerLoginGroupUsing(?Closure $callback): static
+    {
+        $this->developerLoginGroupUsing = $callback;
+
+        return $this;
+    }
+
+    /**
+     * Let the menu's search box find any account, not only the listed ones:
+     * fn (string $search): iterable<Authenticatable>. Keep the result small (limit it).
+     */
+    public function developerLoginSearchUsing(?Closure $callback): static
+    {
+        $this->developerLoginSearchUsing = $callback;
 
         return $this;
     }
@@ -311,6 +337,34 @@ class AccountSwitcherPlugin implements Plugin
         }
 
         return Filament::getUserName($user);
+    }
+
+    public function developerLoginGroup(Authenticatable $user): ?string
+    {
+        if (! $this->developerLoginGroupUsing) {
+            return null;
+        }
+
+        $group = ($this->developerLoginGroupUsing)($user);
+
+        return filled($group) ? (string) $group : null;
+    }
+
+    public function hasDeveloperLoginSearch(): bool
+    {
+        return $this->developerLoginSearchUsing !== null;
+    }
+
+    /**
+     * @return Collection<int, Authenticatable>
+     */
+    public function searchDeveloperLogins(string $search): Collection
+    {
+        if (! $this->developerLoginSearchUsing) {
+            return collect();
+        }
+
+        return collect(($this->developerLoginSearchUsing)($search))->values();
     }
 
     public function getDeveloperLoginRedirectTo(): string|Closure|null

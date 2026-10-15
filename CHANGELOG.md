@@ -2,6 +2,14 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## 4.2.0 — 2026-10-15
+
+### Added
+
+- **Search in the "Switch to" menu**: with six or more developer logins the menu gets a search box that filters the list by label, tag, name, e-mail and username; the list scrolls instead of growing past the viewport.
+- **Tags**: `->developerLoginGroupUsing(fn ($user): ?string)` tags each developer login (its role, its team, ...). The menu offers the tags as filter chips and the login page groups its buttons under them.
+- **Any account**: `->developerLoginSearchUsing(fn (string $search): iterable)` lets the menu's search box look up accounts in the database instead of filtering the listed ones. The listed accounts stay the default view and the only ones on the login page; a switch is accepted only for an account the current search returned, and the environment gate and `developerLoginsWhen()` still apply.
+
 ## 4.1.0 — 2026-10-15
 
 ### Added
