@@ -19,8 +19,8 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 
 - **[Linked accounts](#linked-accounts)**: work from a low-privilege account and switch up to admin only when you need it.
 - **[Impersonation](#impersonation)**: an action for your users table, a banner with Switch back, rules on your model.
-- **[Developer logins](#developer-logins)**: one-click sign-in buttons for your seeded accounts, only in the environments you allow.
-- **[Audit trail](https://packstub.dev/docs/filament-account-switcher/configuration#the-switch-log)**: every switch logged with who, why and from where, plus events.
+- **[Developer logins](#developer-logins)**: one-click sign-in buttons for your seeded accounts, on the login page and in the "Switch to" menu, only in the environments you allow.
+- **[Audit trail](https://packstub.dev/docs/filament-account-switcher/configuration#the-switch-log)**: every switch logged with who, why, from where and any context you attach, plus events and a `log()` call for switches made elsewhere.
 - **[Configurable per panel](#configuration)**: turn each feature on or off, add your own rules, move the banner.
 - **Dark mode and translations**: built from Filament components, every string in a language file.
 

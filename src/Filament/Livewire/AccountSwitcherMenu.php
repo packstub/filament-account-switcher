@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 use Packstub\AccountSwitcher\AccountSwitcher;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
+use Packstub\AccountSwitcher\Enums\SwitchReason;
 use Packstub\AccountSwitcher\Exceptions\AccountSwitchDenied;
 
 /**
@@ -85,7 +86,7 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
                     $action->halt();
                 }
 
-                $this->redirect($switcher->redirectUrlFor($account), navigate: false);
+                $this->redirect($switcher->redirectUrlFor($account, SwitchReason::LinkedAccount), navigate: false);
             });
     }
 
@@ -106,6 +107,52 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
             ->values();
     }
 
+    /**
+     * The developer logins offered in the menu, when the plugin lists them there.
+     *
+     * @return Collection<int, Model&Authenticatable>
+     */
+    public function getDeveloperLogins(): Collection
+    {
+        $switcher = app(AccountSwitcher::class);
+        $plugin = $switcher->plugin();
+
+        if (! $plugin?->hasDeveloperLoginsInMenu() || $switcher->isImpersonating()) {
+            return new Collection;
+        }
+
+        return new Collection($switcher->developerLoginUsers()->all());
+    }
+
+    public function developerLogin(int|string $userId): void
+    {
+        $switcher = app(AccountSwitcher::class);
+
+        $user = $switcher->developerLoginUsers()->first(
+            fn (Authenticatable $candidate): bool => (string) $candidate->getAuthIdentifier() === (string) $userId,
+        );
+
+        if (! $user) {
+            abort(404);
+        }
+
+        $switcher->developerLogin($user);
+
+        $this->redirect($switcher->plugin()?->getDeveloperLoginRedirectTo() !== null
+            ? $switcher->developerLoginRedirectUrl($user)
+            : url()->previous(), navigate: false);
+    }
+
+    public function developerLoginLabel(Authenticatable $user): string
+    {
+        return app(AccountSwitcher::class)->plugin()?->developerLoginLabel($user) ?? Filament::getUserName($user);
+    }
+
+    public function isCurrentUser(Authenticatable $user): bool
+    {
+        return (string) Filament::auth()->user()?->getAuthIdentifier() === (string) $user->getAuthIdentifier();
+    }
+
     public function getManageUrl(): ?string
     {
         return app(AccountSwitcher::class)->plugin()?->getLinkedAccountsUrl();
@@ -124,6 +171,7 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
     {
         return view('packstub-account-switcher::menu', [
             'accounts' => $this->getAccounts(),
+            'developerLogins' => $this->getDeveloperLogins(),
             'manageUrl' => $this->getManageUrl(),
             'plugin' => AccountSwitcherPlugin::get(),
         ]);

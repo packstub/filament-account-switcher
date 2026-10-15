@@ -7,6 +7,7 @@ use Filament\Facades\Filament;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Livewire\Component;
 use Packstub\AccountSwitcher\AccountSwitcher;
+use Packstub\AccountSwitcher\Enums\SwitchReason;
 
 /**
  * Drop-in table or page action: sign in as the record's user.
@@ -34,7 +35,7 @@ class ImpersonateAction extends Action
         $this->action(function (Authenticatable $record, Component $livewire, AccountSwitcher $switcher): void {
             $switcher->impersonate($record);
 
-            $livewire->redirect($switcher->redirectUrlFor($record), navigate: false);
+            $livewire->redirect($switcher->redirectUrlFor($record, SwitchReason::Impersonation), navigate: false);
         });
     }
 }

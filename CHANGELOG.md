@@ -2,7 +2,18 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
-## Unreleased
+## 4.1.0 — 2026-10-15
+
+### Added
+
+- **Developer logins in the "Switch to" menu**: `->developerLoginsInMenu()` lists the developer logins in the switcher dropdown too, so a signed-in developer hops between the seeded accounts without signing out. From the menu a switch stays on the page it was made on.
+- **`->developerLoginsWhen(fn (): bool)`**: a runtime gate on top of the environment list, checked before the buttons render *and* when a login is posted (for example: on a staging server, only offer the accounts to someone already signed in).
+- **`->developerLoginLabelUsing(fn ($user): string)`**: how a developer login is labelled on the login page and in the menu.
+- **`->developerLoginRedirectTo()`**: where a developer login lands when it should differ from `redirectTo()`.
+- **`redirectTo()` receives the reason**: the closure is now called as `fn (Authenticatable $user, ?SwitchReason $reason)`, so one callback can send an impersonation and a developer login to different places.
+- **Landing-page fallback**: after a switch, a 403 or 404 on the page the browser lands on is answered with a redirect to a panel the new account may access, once. On by default; `->fallbackToAccessiblePanel(false)` turns it off per panel.
+- **Switch-log context**: a nullable `context` JSON column on `account_switches`, filled from `AccountSwitcher::resolveLogContextUsing()` (app-wide, e.g. the current tenant) and `->switchLogContextUsing()` (per panel). New migration `add_context_to_account_switches_table` for existing installs: `php artisan vendor:publish --tag="packstub-account-switcher-migrations"` then `php artisan migrate`.
+- **`AccountSwitcher::log($from, $to, $reason, $context)`**: write a switch-log row for a switch that happened outside the plugin (an SSO hand-off, a tenancy impersonation token). Honours the same on/off switches as the plugin's own rows.
 
 ### Changed
 

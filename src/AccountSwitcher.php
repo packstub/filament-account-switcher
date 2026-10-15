@@ -9,6 +9,8 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -18,6 +20,7 @@ use Packstub\AccountSwitcher\Events\AccountSwitched;
 use Packstub\AccountSwitcher\Events\AccountSwitching;
 use Packstub\AccountSwitcher\Exceptions\AccountSwitchDenied;
 use Packstub\AccountSwitcher\Models\AccountSwitch;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
  * The session core shared by all three features. Every switch goes through
@@ -28,6 +31,13 @@ use Packstub\AccountSwitcher\Models\AccountSwitch;
 class AccountSwitcher
 {
     public const SESSION_KEY = 'packstub_account_switcher';
+
+    /**
+     * Flashed on every switch: where to send the browser when the page it lands on is hidden from the new account.
+     */
+    public const FALLBACK_URL_SESSION_KEY = 'packstub_account_switcher_fallback_url';
+
+    protected static ?Closure $logContextResolver = null;
 
     /**
      * @return class-string<Model>
@@ -166,7 +176,7 @@ class AccountSwitcher
             AccountSwitched::dispatch($impersonated, $impersonator, SwitchReason::ImpersonationEnded);
         }
 
-        return $backTo ?: $this->redirectUrlFor($impersonator);
+        return $backTo ?: $this->redirectUrlFor($impersonator, SwitchReason::ImpersonationEnded);
     }
 
     // ------------------------------------------------------------------
@@ -261,8 +271,25 @@ class AccountSwitcher
     {
         $environments = config('packstub-account-switcher.developer_logins.environments', ['local']);
 
+        $plugin = $this->plugin();
+
         return app()->environment($environments)
-            && ($this->plugin()?->hasDeveloperLogins() ?? false);
+            && ($plugin?->hasDeveloperLogins() ?? false)
+            && $plugin->evaluateDeveloperLoginsWhen();
+    }
+
+    /**
+     * Where a developer login lands: the plugin's developerLoginRedirectTo() if set, else the usual switch redirect.
+     */
+    public function developerLoginRedirectUrl(Authenticatable $user): string
+    {
+        $redirect = $this->plugin()?->getDeveloperLoginRedirectTo();
+
+        if ($redirect instanceof Closure) {
+            $redirect = $redirect($user);
+        }
+
+        return filled($redirect) ? $redirect : $this->redirectUrlFor($user, SwitchReason::DeveloperLogin);
     }
 
     /**
@@ -313,12 +340,12 @@ class AccountSwitcher
      * Where to land after switching: the plugin's redirectTo() if set, else the
      * current panel when the user may access it, else the first panel they may.
      */
-    public function redirectUrlFor(Authenticatable $user): string
+    public function redirectUrlFor(Authenticatable $user, ?SwitchReason $reason = null): string
     {
         $redirect = $this->plugin()?->getRedirectTo();
 
         if ($redirect instanceof Closure) {
-            $redirect = $redirect($user);
+            $redirect = $redirect($user, $reason);
         }
 
         if (filled($redirect)) {
@@ -381,17 +408,65 @@ class AccountSwitcher
             'password_hash_'.auth()->getDefaultDriver(),
             'password_hash_'.config('auth.defaults.guard'),
         ]));
+
+        if ($this->plugin()?->hasFallbackToAccessiblePanel() ?? true) {
+            session()->flash(self::FALLBACK_URL_SESSION_KEY, $this->accessiblePanel($user)?->getUrl() ?? url('/'));
+        }
     }
 
-    protected function record(?Authenticatable $from, Authenticatable $to, SwitchReason $reason): void
+    /**
+     * After a switch, a 403 or 404 on the page the browser landed on is answered with a redirect to a panel
+     * the new account may access. The fallback URL is flashed, so it applies to that one request only.
+     */
+    public function redirectWhenPageIsInaccessible(HttpExceptionInterface $exception, Request $request): ?RedirectResponse
+    {
+        if (! in_array($exception->getStatusCode(), [403, 404], true) || ! $request->isMethod('GET') || ! $request->hasSession()) {
+            return null;
+        }
+
+        $fallbackUrl = $request->session()->pull(self::FALLBACK_URL_SESSION_KEY);
+
+        if (! is_string($fallbackUrl) || $fallbackUrl === $request->url()) {
+            return null;
+        }
+
+        // Not redirect(): while Livewire mounts a page its own redirector is bound in place of Laravel's.
+        return new RedirectResponse($fallbackUrl);
+    }
+
+    // ------------------------------------------------------------------
+    // Switch log
+    // ------------------------------------------------------------------
+
+    /**
+     * Extra columns for every switch-log row, e.g. the current tenant: fn (SwitchReason $reason): array
+     */
+    public static function resolveLogContextUsing(?Closure $callback): void
+    {
+        static::$logContextResolver = $callback;
+    }
+
+    /**
+     * Write a switch-log row for a switch that happened outside the plugin (an SSO hand-off, a tenancy
+     * impersonation token, ...). Honours the same on/off switches as the plugin's own rows.
+     *
+     * @param  array<string, mixed>  $context
+     */
+    public function log(?Authenticatable $from, Authenticatable $to, SwitchReason $reason, array $context = []): ?AccountSwitch
     {
         $enabled = $this->plugin()?->shouldLogSwitches() ?? config('packstub-account-switcher.log_switches', true);
 
         if (! $enabled) {
-            return;
+            return null;
         }
 
-        AccountSwitch::query()->create([
+        $context = [
+            ...(static::$logContextResolver ? (array) (static::$logContextResolver)($reason) : []),
+            ...($this->plugin()?->evaluateSwitchLogContext($reason) ?? []),
+            ...$context,
+        ];
+
+        return AccountSwitch::query()->create([
             'from_user_id' => $from?->getAuthIdentifier(),
             'to_user_id' => $to->getAuthIdentifier(),
             'reason' => $reason,
@@ -399,7 +474,13 @@ class AccountSwitcher
             'guard' => $this->guardName(),
             'ip_address' => request()->ip(),
             'user_agent' => Str::limit((string) request()->userAgent(), 500, ''),
+            'context' => $context ?: null,
             'created_at' => now(),
         ]);
+    }
+
+    protected function record(?Authenticatable $from, Authenticatable $to, SwitchReason $reason): void
+    {
+        $this->log($from, $to, $reason);
     }
 }

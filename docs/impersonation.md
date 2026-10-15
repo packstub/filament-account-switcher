@@ -83,6 +83,15 @@ php artisan vendor:publish --tag="packstub-account-switcher-views"
 
 The banner is a plain Blade view with inline styles so it works with any panel theme and doesn't need a custom Tailwind build.
 
+## Landing on a hidden page
+
+The page the browser lands on after a switch may be one the new account cannot see — a record the impersonated user has no access to, or a resource page that does not exist for them. Rather than show them a 403 or 404 as their first impression, the plugin flashes a fallback URL on every switch and, if the landing request fails with 403 or 404, redirects to a panel the new account may access. It applies to that one request only; later 403s and 404s are shown as usual.
+
+```php
+AccountSwitcherPlugin::make()
+    ->fallbackToAccessiblePanel(false) // on by default
+```
+
 ## Switching back
 
 **Switch back** posts to `filament.{panel}.account-switcher.switch-back`, a CSRF-protected route inside the panel's authenticated group. It restores the impersonator's session, logs the end of the impersonation, and returns to the page the impersonation started from.

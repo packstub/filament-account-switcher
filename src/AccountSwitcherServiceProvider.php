@@ -3,11 +3,15 @@
 namespace Packstub\AccountSwitcher;
 
 use BladeUI\Icons\Factory as IconFactory;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Foundation\Exceptions\Handler;
+use Illuminate\Http\Request;
 use Livewire\Livewire;
 use Packstub\AccountSwitcher\Filament\Livewire\AccountSwitcherMenu;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class AccountSwitcherServiceProvider extends PackageServiceProvider
 {
@@ -20,7 +24,7 @@ class AccountSwitcherServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasViews(static::$name)
             ->hasTranslations()
-            ->hasMigrations(['create_linked_accounts_table', 'create_account_switches_table'])
+            ->hasMigrations(['create_linked_accounts_table', 'create_account_switches_table', 'add_context_to_account_switches_table'])
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->publishConfigFile()
@@ -45,5 +49,11 @@ class AccountSwitcherServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         Livewire::component('packstub-account-switcher-menu', AccountSwitcherMenu::class);
+
+        $this->callAfterResolving(ExceptionHandler::class, function (ExceptionHandler $handler): void {
+            if ($handler instanceof Handler) {
+                $handler->renderable(fn (HttpExceptionInterface $exception, Request $request) => app(AccountSwitcher::class)->redirectWhenPageIsInaccessible($exception, $request));
+            }
+        });
     }
 }
