@@ -141,7 +141,7 @@ it('pins the tables to the configured connection', function (): void {
     ]);
     config()->set('packstub-account-switcher.connection', 'audit');
 
-    (include __DIR__.'/../../database/migrations/create_account_switches_table.php.stub')->up();
+    (include __DIR__.'/../../vendor/packstub/account-switcher/database/migrations/create_account_switches_table.php.stub')->up();
 
     expect((new AccountSwitch)->getConnectionName())->toBe('audit')
         ->and(Schema::connection('audit')->hasTable((new AccountSwitch)->getTable()))->toBeTrue();

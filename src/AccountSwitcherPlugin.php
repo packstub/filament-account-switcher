@@ -291,18 +291,7 @@ class AccountSwitcherPlugin implements Plugin
      */
     public function resolveDeveloperLoginUsers(): Collection
     {
-        $users = $this->developerLoginUsers;
-        $model = AccountSwitcher::userModel();
-
-        if ($users instanceof Closure) {
-            return collect($users());
-        }
-
-        if (is_array($users)) {
-            return $model::query()->whereIn('email', $users)->orderBy('id')->get();
-        }
-
-        return $model::query()->orderBy('id')->limit(10)->get();
+        return AccountSwitcher::resolveUsers($this->developerLoginUsers);
     }
 
     // ------------------------------------------------------------------

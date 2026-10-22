@@ -94,21 +94,12 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
      */
     public function getAccounts(): Collection
     {
-        $user = Filament::auth()->user();
-        $switcher = app(AccountSwitcher::class);
-
-        if (! $switcher->supportsLinkedAccounts($user) || $switcher->isImpersonating()) {
-            return new Collection;
-        }
-
-        return $user->linkedAccounts
-            ->filter(fn (Model $account): bool => $switcher->canSwitchToLinkedAccount($user, $account))
-            ->values();
+        return new Collection(app(AccountSwitcher::class)->switchableAccounts(Filament::auth()->user()));
     }
 
     public function getManageUrl(): ?string
     {
-        return app(AccountSwitcher::class)->plugin()?->getLinkedAccountsUrl();
+        return AccountSwitcherPlugin::get()->getLinkedAccountsUrl();
     }
 
     public function accountLabel(?Model $account): string

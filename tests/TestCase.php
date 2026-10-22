@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Packstub\AccountSwitcher\AccountSwitcherServiceProvider;
+use Packstub\AccountSwitcher\Filament\FilamentAccountSwitcherServiceProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\AdminPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\TenantPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\User;
@@ -51,6 +52,7 @@ abstract class TestCase extends Orchestra
             // override first and Livewire pins the shared instance. Keep that order.
             LivewireServiceProvider::class,
             AccountSwitcherServiceProvider::class,
+            FilamentAccountSwitcherServiceProvider::class,
             AdminPanelProvider::class,
             TenantPanelProvider::class,
         ];
@@ -94,7 +96,7 @@ abstract class TestCase extends Orchestra
         });
 
         foreach (['create_linked_accounts_table', 'create_account_switches_table'] as $migration) {
-            (include __DIR__."/../database/migrations/{$migration}.php.stub")->up();
+            (include __DIR__."/../vendor/packstub/account-switcher/database/migrations/{$migration}.php.stub")->up();
         }
     }
 }
