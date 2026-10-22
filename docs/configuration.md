@@ -1,6 +1,6 @@
 # Configuration
 
-Most settings live on the plugin so each panel can differ; a small config file holds the app-wide ones (tables, user model, environments).
+Most settings live on the plugin so each panel can differ; a small config file holds the app-wide ones (tables, user model, environments). The config file, the migrations, the models, the events and the facade belong to [`packstub/account-switcher`](https://packstub.dev/docs/account-switcher), the session core this plugin builds on; its `features`, `redirect_to`, `guard` and `developer_logins.users` keys only apply outside a panel, because inside one the plugin decides.
 
 ## The plugin API
 
@@ -63,7 +63,7 @@ After a switch the plugin sends the browser to:
 ## The config file
 
 ```bash
-php artisan vendor:publish --tag="packstub-account-switcher-config"
+php artisan vendor:publish --tag="account-switcher-config"
 ```
 
 ```php
@@ -145,8 +145,9 @@ Event::listen(AccountSwitched::class, function (AccountSwitched $event): void {
 | `canImpersonate($by, $target)` / `impersonate($target)` / `isImpersonating()` / `impersonator()` / `stopImpersonating()` | Impersonation |
 | `canSwitchToLinkedAccount($from, $to)` / `requiresPassword($from, $to)` / `switchToLinkedAccount($to, $password)` | Linked accounts |
 | `developerLoginsEnabled()` / `developerLoginUsers()` / `developerLogin($user)` | Developer logins |
+| `switchableAccounts($user)` / `passwordMatches($account, $password)` | The accounts a user may switch to right now; verify a plain-text password |
 | `redirectUrlFor($user)` / `accessiblePanel($user)` | Panel resolution |
-| `plugin()` / `userModel()` | Current panel's plugin instance; resolved user model class |
+| `plugin()` / `context()` / `userModel()` | Current panel's plugin instance; the `PanelContext` behind the service; resolved user model class |
 
 Denied operations throw `Packstub\AccountSwitcher\Exceptions\AccountSwitchDenied` (an `AuthorizationException`).
 
@@ -157,4 +158,4 @@ php artisan vendor:publish --tag="packstub-account-switcher-translations"
 php artisan vendor:publish --tag="packstub-account-switcher-views"
 ```
 
-Strings live under `lang/vendor/packstub-account-switcher/{locale}/account-switcher.php`; views under `resources/views/vendor/packstub-account-switcher/` (`menu`, `banner`, `developer-logins`, `pages/linked-accounts`).
+Strings live under `lang/vendor/packstub-account-switcher/{locale}/account-switcher.php`; views under `resources/views/vendor/packstub-account-switcher/` (`menu`, `banner`, `developer-logins`, `pages/linked-accounts`). The error messages and the switch reason labels come from the core package: `php artisan vendor:publish --tag="account-switcher-translations"` puts them under `lang/vendor/account-switcher/{locale}/messages.php`.

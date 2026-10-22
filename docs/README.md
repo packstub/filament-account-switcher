@@ -7,6 +7,7 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 - Repository: [github.com/packstub/filament-account-switcher](https://github.com/packstub/filament-account-switcher)
 - Packagist: [packstub/filament-account-switcher](https://packagist.org/packages/packstub/filament-account-switcher)
 - Support: [GitHub issues](https://github.com/packstub/filament-account-switcher/issues)
+- Without Filament: [Account Switcher for Laravel](https://packstub.dev/docs/account-switcher), the core this plugin builds on
 
 ## Features
 

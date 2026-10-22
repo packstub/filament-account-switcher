@@ -6,6 +6,11 @@ All notable changes to `packstub/filament-account-switcher` are documented here.
 
 ### Changed
 
+- **Built on [`packstub/account-switcher`](https://github.com/packstub/account-switcher)**: the session core (the `AccountSwitcher` service and facade, models, trait, events, enum, exception, controllers, config file and migrations) moved to a package of its own, so a Laravel app without Filament gets the same features. This plugin requires it and keeps the panel side: the plugin, the menu, the Linked accounts page, the action, the views and a `PanelContext` that answers the core's questions (guard, redirects, feature toggles, rules) from the current panel's plugin. Nothing changes for an installed app: every class keeps its name and namespace, the config key stays `packstub-account-switcher`, the migrations and routes are the same, and `AccountSwitcher::plugin()` / `accessiblePanel()` stay on the facade. See [UPGRADE.md](UPGRADE.md#upgrading-to-41) for the two things that moved.
+- The service provider is now `Packstub\AccountSwitcher\Filament\FilamentAccountSwitcherServiceProvider` (the core owns `AccountSwitcherServiceProvider`); package discovery picks it up.
+- `php artisan packstub-account-switcher:install` runs the core's `account-switcher:install`; the publish tags are the core's (`account-switcher-config`, `account-switcher-migrations`).
+- The error messages and the switch reason labels are translated by the core (`account-switcher::messages`), so they read the same in a panel and outside one.
+- The "Switch to" menu lists `AccountSwitcher::switchableAccounts()`, the core's answer, instead of filtering on its own.
 - **Docs**: a shorter Features list in the README and on the docs index, one line per area.
 
 ## 4.0.4 — 2026-09-28

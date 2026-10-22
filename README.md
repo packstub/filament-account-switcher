@@ -13,7 +13,7 @@
 
 </div>
 
-Switch between accounts in a Filament panel without signing out — safely, in production.
+Switch between accounts in a Filament panel without signing out — safely, in production. The panel UI of [Account Switcher for Laravel](https://github.com/packstub/account-switcher), which does the same in any Laravel app.
 
 ## Features
 
@@ -30,7 +30,8 @@ Formerly `xlite-dev/filament-impersonate` — see the [upgrade guide](https://gi
 
 | Plugin | Filament | Laravel | PHP |
 | --- | --- | --- | --- |
-| 4.x | 4.x, 5.x | 12.x, 13.x | 8.2+ |
+| 4.1+ (with `packstub/account-switcher` 1.x) | 4.x, 5.x | 12.x, 13.x | 8.2+ |
+| 4.0 | 4.x, 5.x | 12.x, 13.x | 8.2+ |
 | 3.x (`xlite-dev/filament-impersonate`) | 4.x, 5.x | 9.x – 12.x | 8.1+ |
 
 ## Installation

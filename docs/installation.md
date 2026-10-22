@@ -14,11 +14,11 @@ composer require packstub/filament-account-switcher
 php artisan packstub-account-switcher:install
 ```
 
-The install command publishes the config file and the two migrations (`linked_accounts`, `account_switches`) and offers to run them. You can run the pieces yourself instead:
+This installs [`packstub/account-switcher`](https://packstub.dev/docs/account-switcher) with it: the session core (impersonation, linked accounts, developer logins, the audit log) that works in any Laravel app. This plugin is the panel on top. The install command publishes the core's config file and the two migrations (`linked_accounts`, `account_switches`) and offers to run them. You can run the pieces yourself instead:
 
 ```bash
-php artisan vendor:publish --tag="packstub-account-switcher-config"
-php artisan vendor:publish --tag="packstub-account-switcher-migrations"
+php artisan vendor:publish --tag="account-switcher-config"
+php artisan vendor:publish --tag="account-switcher-migrations"
 php artisan migrate
 ```
 
