@@ -14,16 +14,28 @@ composer require packstub/filament-account-switcher
 php artisan packstub-account-switcher:install
 ```
 
-The install command publishes the config file and the two migrations (`linked_accounts`, `account_switches`) and offers to run them. You can run the pieces yourself instead:
+This installs [`packstub/account-switcher`](https://packstub.dev/docs/account-switcher) with it: the session core (impersonation, linked accounts, developer logins, the audit log) that works in any Laravel app. This plugin is the panel on top. The install command publishes the core's config file and the two migrations (`linked_accounts`, `account_switches`) and offers to run them. You can run the pieces yourself instead:
 
 ```bash
-php artisan vendor:publish --tag="packstub-account-switcher-config"
-php artisan vendor:publish --tag="packstub-account-switcher-migrations"
+php artisan vendor:publish --tag="account-switcher-config"
+php artisan vendor:publish --tag="account-switcher-migrations"
 php artisan migrate
 ```
 
 > [!NOTE]
 > The migrations reference your user model's table through `config('auth.providers.users.model')`. If your panel authenticates a different model, set `user_model` in the config file **before** migrating — see [Configuration](configuration.md#user-model).
+
+### Without migrations
+
+Only need impersonation and one-click developer logins? Skip the migrations. Those two features keep their state in the session; only linked accounts (the `linked_accounts` table) and the switch log (the `account_switches` table) need the database. Turn both off with one call when you register the plugin (step 3):
+
+```php
+AccountSwitcherPlugin::make()
+    ->withoutDatabase()
+    ->developerLogins(['admin@example.com', 'user@example.com'])
+```
+
+Then skip the install command, or answer "no" when it offers to run the migrations, and skip the `HasLinkedAccounts` trait in step 2. The config file is optional too. `withoutDatabase()` is the same as `->linkedAccounts(false)->logSwitches(false)`, and either feature can come back later: run the migrations, then call `->logSwitches()` or `->linkedAccounts()` after it. Without the log, the `AccountSwitched` event is your audit trail; see [Security](security.md).
 
 ## 2. Prepare the user model
 

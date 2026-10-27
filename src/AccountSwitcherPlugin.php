@@ -274,6 +274,17 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
+     * Impersonation and developer logins only: turns off linked accounts and
+     * the switch log, the two features that need the package's tables, so
+     * the panel works without its migrations. A later call may turn either
+     * back on.
+     */
+    public function withoutDatabase(): static
+    {
+        return $this->linkedAccounts(false)->logSwitches(false);
+    }
+
+    /**
      * Where the "Switch to" menu renders; a PanelsRenderHook constant.
      */
     public function switcherRenderHook(string $hook): static
@@ -462,18 +473,7 @@ class AccountSwitcherPlugin implements Plugin
      */
     public function resolveDeveloperLoginUsers(): Collection
     {
-        $users = $this->developerLoginUsers;
-        $model = AccountSwitcher::userModel();
-
-        if ($users instanceof Closure) {
-            return collect($users());
-        }
-
-        if (is_array($users)) {
-            return $model::query()->whereIn('email', $users)->orderBy('id')->get();
-        }
-
-        return $model::query()->orderBy('id')->limit(10)->get();
+        return AccountSwitcher::resolveUsers($this->developerLoginUsers);
     }
 
     // ------------------------------------------------------------------

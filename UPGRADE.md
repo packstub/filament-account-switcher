@@ -1,3 +1,12 @@
+# Upgrading to 4.3
+
+4.3 builds on [`packstub/account-switcher`](https://github.com/packstub/account-switcher), the session core carved out of this plugin so a Laravel app without Filament can use it. Composer installs it with the plugin; `composer update packstub/filament-account-switcher` is the whole upgrade for most apps. Every class keeps its name and namespace, the config key stays `packstub-account-switcher`, and the routes, tables and events are unchanged. Two things moved:
+
+- **Translations**: the `errors.*` and `reasons.*` strings now come from the core's `account-switcher::messages` file. If you published the plugin's translations and changed those strings, publish the core's and move them: `php artisan vendor:publish --tag="account-switcher-translations"` writes `lang/vendor/account-switcher/{locale}/messages.php`.
+- **Publish tags**: the config file and the migrations are published by the core, under `account-switcher-config` and `account-switcher-migrations`. `php artisan packstub-account-switcher:install` still works and runs the core's installer.
+
+If you registered the service provider by hand (package discovery off), the class is now `Packstub\AccountSwitcher\Filament\FilamentAccountSwitcherServiceProvider`, next to the core's `Packstub\AccountSwitcher\AccountSwitcherServiceProvider`.
+
 # Upgrading from `xlite-dev/filament-impersonate` 3.x
 
 The package was renamed to `packstub/filament-account-switcher` and rebuilt with a shared session core, linked accounts, developer logins and an audit log. Impersonation keeps the same authorization hooks (`canImpersonate()` / `canBeImpersonated()` on your model) but the classes moved.
@@ -43,7 +52,7 @@ AccountSwitcherPlugin::make()
 Delete `config/filament-impersonate.php` and publish the new file if you need it:
 
 ```bash
-php artisan vendor:publish --tag="packstub-account-switcher-config"
+php artisan vendor:publish --tag="account-switcher-config"
 ```
 
 - `guard`, `redirect_to`, `leave_middlewares` — removed. The panel's own guard and route group are used; set `->redirectTo()` on the plugin to override the landing URL.
