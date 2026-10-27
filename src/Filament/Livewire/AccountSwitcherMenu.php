@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 use Packstub\AccountSwitcher\AccountSwitcher;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
+use Packstub\AccountSwitcher\Enums\SwitchReason;
 use Packstub\AccountSwitcher\Exceptions\AccountSwitchDenied;
 
 /**
@@ -28,6 +29,15 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
 {
     use InteractsWithActions;
     use InteractsWithSchemas;
+
+    /**
+     * Below this many developer logins the menu shows no search box.
+     */
+    public const DEVELOPER_LOGIN_SEARCH_THRESHOLD = 6;
+
+    public string $developerLoginSearch = '';
+
+    public ?string $developerLoginGroup = null;
 
     public function switchAction(): Action
     {
@@ -85,7 +95,7 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
                     $action->halt();
                 }
 
-                $this->redirect($switcher->redirectUrlFor($account), navigate: false);
+                $this->redirect($switcher->redirectUrlFor($account, SwitchReason::LinkedAccount), navigate: false);
             });
     }
 
@@ -95,6 +105,115 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
     public function getAccounts(): Collection
     {
         return new Collection(app(AccountSwitcher::class)->switchableAccounts(Filament::auth()->user()));
+    }
+
+    /**
+     * Every developer login the menu may offer, when the plugin lists them there.
+     *
+     * @return Collection<int, Model&Authenticatable>
+     */
+    public function getAllDeveloperLogins(): Collection
+    {
+        $switcher = app(AccountSwitcher::class);
+        $plugin = $switcher->plugin();
+
+        if (! $plugin?->hasDeveloperLoginsInMenu() || $switcher->isImpersonating()) {
+            return new Collection;
+        }
+
+        return new Collection($switcher->developerLoginUsers()->all());
+    }
+
+    /**
+     * The developer logins after the search box and the selected tag. With a search resolver on the
+     * plugin, a non-empty search looks up any account instead of filtering the listed ones.
+     *
+     * @return Collection<int, Model&Authenticatable>
+     */
+    public function getDeveloperLogins(): Collection
+    {
+        $switcher = app(AccountSwitcher::class);
+        $search = trim($this->developerLoginSearch);
+
+        if ($this->getAllDeveloperLogins()->isEmpty() && ! ($search !== '' && $switcher->plugin()?->hasDeveloperLoginSearch())) {
+            return new Collection;
+        }
+
+        $users = $search === ''
+            ? $this->getAllDeveloperLogins()
+            : new Collection($switcher->searchDeveloperLogins($search)->all());
+
+        return $users
+            ->filter(fn (Authenticatable $user): bool => $this->developerLoginGroup === null || $this->developerLoginGroup($user) === $this->developerLoginGroup)
+            ->values();
+    }
+
+    /**
+     * The tags offered as filters, in the order they first appear.
+     *
+     * @return array<int, string>
+     */
+    public function getDeveloperLoginGroups(): array
+    {
+        return $this->getAllDeveloperLogins()
+            ->map(fn (Authenticatable $user): ?string => $this->developerLoginGroup($user))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function hasDeveloperLoginSearch(): bool
+    {
+        $switcher = app(AccountSwitcher::class);
+
+        if (! $switcher->developerLoginsEnabled() || ! $switcher->plugin()?->hasDeveloperLoginsInMenu() || $switcher->isImpersonating()) {
+            return false;
+        }
+
+        return $switcher->plugin()->hasDeveloperLoginSearch()
+            || $this->getAllDeveloperLogins()->count() >= self::DEVELOPER_LOGIN_SEARCH_THRESHOLD;
+    }
+
+    public function filterDeveloperLogins(?string $group): void
+    {
+        $this->developerLoginGroup = $group === $this->developerLoginGroup ? null : $group;
+    }
+
+    public function developerLoginGroup(Authenticatable $user): ?string
+    {
+        return app(AccountSwitcher::class)->plugin()?->developerLoginGroup($user);
+    }
+
+    public function developerLogin(int|string $userId): void
+    {
+        $switcher = app(AccountSwitcher::class);
+
+        $matches = fn (Authenticatable $candidate): bool => (string) $candidate->getAuthIdentifier() === (string) $userId;
+        $search = trim($this->developerLoginSearch);
+
+        $user = $switcher->developerLoginUsers()->first($matches)
+            ?? ($search !== '' ? $switcher->searchDeveloperLogins($search)->first($matches) : null);
+
+        if (! $user) {
+            abort(404);
+        }
+
+        $switcher->developerLogin($user, $search);
+
+        $this->redirect($switcher->plugin()?->getDeveloperLoginRedirectTo() !== null
+            ? $switcher->developerLoginRedirectUrl($user)
+            : url()->previous(), navigate: false);
+    }
+
+    public function developerLoginLabel(Authenticatable $user): string
+    {
+        return app(AccountSwitcher::class)->plugin()?->developerLoginLabel($user) ?? Filament::getUserName($user);
+    }
+
+    public function isCurrentUser(Authenticatable $user): bool
+    {
+        return (string) Filament::auth()->user()?->getAuthIdentifier() === (string) $user->getAuthIdentifier();
     }
 
     public function getManageUrl(): ?string
@@ -115,6 +234,10 @@ class AccountSwitcherMenu extends Component implements HasActions, HasSchemas
     {
         return view('packstub-account-switcher::menu', [
             'accounts' => $this->getAccounts(),
+            'developerLogins' => $this->getDeveloperLogins(),
+            'hasDeveloperLogins' => $this->getAllDeveloperLogins()->isNotEmpty(),
+            'developerLoginGroups' => $this->getDeveloperLoginGroups(),
+            'hasDeveloperLoginSearch' => $this->hasDeveloperLoginSearch(),
             'manageUrl' => $this->getManageUrl(),
             'plugin' => AccountSwitcherPlugin::get(),
         ]);

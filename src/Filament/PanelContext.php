@@ -12,6 +12,7 @@ use Illuminate\Support\Collection;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
 use Packstub\AccountSwitcher\AppContext;
 use Packstub\AccountSwitcher\Contracts\SwitchContext;
+use Packstub\AccountSwitcher\Enums\SwitchReason;
 
 /**
  * The switch context of a Filament app: the current panel's guard and URLs,
@@ -102,12 +103,12 @@ class PanelContext implements SwitchContext
      * The plugin's redirectTo() if set, else the current panel when the user
      * may access it, else the first panel they may, else the current panel.
      */
-    public function redirectUrlFor(Authenticatable $user): string
+    public function redirectUrlFor(Authenticatable $user, ?SwitchReason $reason = null): string
     {
         $redirect = $this->plugin()?->getRedirectTo();
 
         if ($redirect instanceof Closure) {
-            $redirect = $redirect($user);
+            $redirect = $redirect($user, $reason);
         }
 
         if (filled($redirect)) {
@@ -116,7 +117,43 @@ class PanelContext implements SwitchContext
 
         $panel = $this->accessiblePanel($user) ?? $this->panel();
 
-        return $panel?->getUrl() ?? $this->app->redirectUrlFor($user);
+        return $panel?->getUrl() ?? $this->app->redirectUrlFor($user, $reason);
+    }
+
+    /**
+     * A panel the account may access, for a landing page that answers 403 or
+     * 404; null when the plugin's fallbackToAccessiblePanel() is off.
+     */
+    public function fallbackUrlFor(Authenticatable $user): ?string
+    {
+        $plugin = $this->plugin();
+
+        if (! $plugin) {
+            return $this->app->fallbackUrlFor($user);
+        }
+
+        if (! $plugin->hasFallbackToAccessiblePanel()) {
+            return null;
+        }
+
+        return $this->accessiblePanel($user)?->getUrl() ?? url('/');
+    }
+
+    public function developerLoginRedirectUrlFor(Authenticatable $user): ?string
+    {
+        $plugin = $this->plugin();
+
+        if (! $plugin) {
+            return $this->app->developerLoginRedirectUrlFor($user);
+        }
+
+        $redirect = $plugin->getDeveloperLoginRedirectTo();
+
+        if ($redirect instanceof Closure) {
+            $redirect = $redirect($user);
+        }
+
+        return filled($redirect) ? $redirect : null;
     }
 
     public function loginUrl(): string
@@ -139,6 +176,11 @@ class PanelContext implements SwitchContext
         return $this->plugin()?->hasDeveloperLogins() ?? $this->app->hasDeveloperLogins();
     }
 
+    public function allowsDeveloperLogins(): bool
+    {
+        return $this->plugin()?->evaluateDeveloperLoginsWhen() ?? $this->app->allowsDeveloperLogins();
+    }
+
     public function allowsImpersonation(Authenticatable $by, Authenticatable $target): bool
     {
         $plugin = $this->plugin();
@@ -158,9 +200,40 @@ class PanelContext implements SwitchContext
         return $this->plugin()?->resolveDeveloperLoginUsers() ?? $this->app->developerLoginUsers();
     }
 
+    public function developerLoginLabel(Authenticatable $user): string
+    {
+        return $this->plugin()?->developerLoginLabel($user) ?? $this->app->developerLoginLabel($user);
+    }
+
+    public function developerLoginGroup(Authenticatable $user): ?string
+    {
+        $plugin = $this->plugin();
+
+        return $plugin ? $plugin->developerLoginGroup($user) : $this->app->developerLoginGroup($user);
+    }
+
+    public function searchesDeveloperLogins(): bool
+    {
+        return $this->plugin()?->hasDeveloperLoginSearch() ?? $this->app->searchesDeveloperLogins();
+    }
+
+    public function searchDeveloperLogins(string $search): Collection
+    {
+        $plugin = $this->plugin();
+
+        return $plugin ? $plugin->searchDeveloperLogins($search) : $this->app->searchDeveloperLogins($search);
+    }
+
     public function logsSwitches(): bool
     {
         return $this->plugin()?->shouldLogSwitches() ?? $this->app->logsSwitches();
+    }
+
+    public function switchLogContext(SwitchReason $reason): array
+    {
+        $plugin = $this->plugin();
+
+        return $plugin ? $plugin->evaluateSwitchLogContext($reason) : $this->app->switchLogContext($reason);
     }
 
     public function switchBackUrl(): ?string

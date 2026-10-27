@@ -97,7 +97,7 @@ abstract class TestCase extends Orchestra
             $table->foreignId('user_id');
         });
 
-        foreach (['create_linked_accounts_table', 'create_account_switches_table'] as $migration) {
+        foreach (['create_linked_accounts_table', 'create_account_switches_table', 'add_context_to_account_switches_table'] as $migration) {
             (include __DIR__."/../vendor/packstub/account-switcher/database/migrations/{$migration}.php.stub")->up();
         }
     }
