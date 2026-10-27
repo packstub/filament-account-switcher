@@ -2,7 +2,11 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
-## Unreleased
+## 4.1.0 — 2026-10-27
+
+### Added
+
+- **Install without migrations**: `AccountSwitcherPlugin::make()->withoutDatabase()` turns off linked accounts and the switch log, the two features that need the package's tables, so a panel that only wants impersonation and one-click developer logins skips the migrations, the install command and the `HasLinkedAccounts` trait. It is shorthand for `->linkedAccounts(false)->logSwitches(false)`; see [Installation](docs/installation.md#without-migrations).
 
 ### Changed
 

@@ -27,6 +27,10 @@ AccountSwitcherPlugin::make()
     // Audit log on/off for this panel (defaults to the config value)
     ->logSwitches(true)
 
+    // Impersonation and developer logins only, no tables:
+    // linkedAccounts(false) + logSwitches(false)
+    ->withoutDatabase()
+
     // UI placement
     ->switcherRenderHook(PanelsRenderHook::USER_MENU_BEFORE)
     ->banner(position: 'bottom', style: 'dark')
@@ -48,6 +52,8 @@ AccountSwitcherPlugin::make()
 | `developerLogins()` | **off** | No buttons, developer-login route not registered |
 
 Each accepts a `Closure` for runtime decisions, e.g. `->impersonation(fn (): bool => config('features.impersonation'))`.
+
+`withoutDatabase()` turns off the two features that need the package's tables, linked accounts and the switch log, so the panel runs without its migrations. See [Installation](installation.md#without-migrations).
 
 ### Redirects
 

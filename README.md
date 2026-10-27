@@ -66,6 +66,8 @@ $panel->plugin(
 );
 ```
 
+Only need impersonation and developer logins? Add `->withoutDatabase()` to the plugin and skip the install command: no migrations, no trait ([without migrations](https://packstub.dev/docs/filament-account-switcher/installation#without-migrations)).
+
 Full walkthrough: [Installation](https://packstub.dev/docs/filament-account-switcher/installation).
 
 ## Linked accounts

@@ -20,6 +20,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 use Packstub\AccountSwitcher\AccountSwitcherServiceProvider;
 use Packstub\AccountSwitcher\Filament\FilamentAccountSwitcherServiceProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\AdminPanelProvider;
+use Packstub\AccountSwitcher\Tests\Fixtures\LitePanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\TenantPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\User;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
@@ -55,6 +56,7 @@ abstract class TestCase extends Orchestra
             FilamentAccountSwitcherServiceProvider::class,
             AdminPanelProvider::class,
             TenantPanelProvider::class,
+            LitePanelProvider::class,
         ];
     }
 
