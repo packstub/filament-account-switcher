@@ -2,7 +2,7 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
-## Unreleased
+## 4.4.0 — 2026-10-28
 
 ### Added
 

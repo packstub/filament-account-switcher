@@ -1,3 +1,7 @@
+# Upgrading to 4.4
+
+Nothing to change: `composer update packstub/filament-account-switcher`. If you published `banner.blade.php`, it keeps working without the new ⋮ menu and render hooks; republish it (`php artisan vendor:publish --tag="packstub-account-switcher-views" --force`, after saving your changes) to get them. The **Session replays** item needs [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) 1.1 or later.
+
 # Upgrading to 4.3
 
 4.3 builds on [`packstub/account-switcher`](https://github.com/packstub/account-switcher), the session core carved out of this plugin so a Laravel app without Filament can use it. Composer installs it with the plugin; `composer update packstub/filament-account-switcher` is the whole upgrade for most apps. Every class keeps its name and namespace, the config key stays `packstub-account-switcher`, and the routes, tables and events are unchanged. Two things moved:
