@@ -50,6 +50,7 @@
     "require-dev": {
         "laravel/pint": "^1.27",
         "orchestra/testbench": "^10.0 || ^11.0",
+        "packstub/filament-session-replay": "^1.1",
         "pestphp/pest": "^4.0 || ^5.0",
         "pestphp/pest-plugin-livewire": "^4.0 || ^5.0"
     },
@@ -81,6 +82,9 @@
                 "Packstub\\AccountSwitcher\\Filament\\FilamentAccountSwitcherServiceProvider"
             ]
         }
+    },
+    "suggest": {
+        "packstub/filament-session-replay": "A Session replays button on the impersonation banner: switch back and land on the recordings of the person you were signed in as (1.1 or later)."
     },
     "minimum-stability": "stable",
     "prefer-stable": true

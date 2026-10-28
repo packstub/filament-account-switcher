@@ -16,6 +16,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
+use Packstub\SessionReplay\SessionReplayPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,9 +42,10 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->plugin(
+            ->plugins([
                 AccountSwitcherPlugin::make()
                     ->developerLogins(fn () => User::query()->where('email', 'like', 'dev-%')->get()),
-            );
+                SessionReplayPlugin::make()->record(false),
+            ]);
     }
 }
