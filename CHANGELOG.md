@@ -11,6 +11,7 @@ All notable changes to `packstub/filament-account-switcher` are documented here.
 
 ### Fixed
 
+- **"Switch to" on a phone**: below the `sm` breakpoint the topbar button is just its icon (labelled "Switch to" for screen readers), so it no longer wraps onto two lines next to the other topbar items. From `sm` up it is unchanged.
 - **The impersonation banner on phones**: the bar was a fixed 3rem high, so on a narrow screen the message wrapped to three lines and its first line showed above the bar, over the page. Below 40rem the bar is now 3.5rem and the message keeps to two lines beside the buttons, which no longer break inside themselves. The height is the `--fi-account-switcher-banner-height` CSS variable, which the top position's offsets follow too.
 
 ### Changed
