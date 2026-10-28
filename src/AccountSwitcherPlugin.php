@@ -72,6 +72,9 @@ class AccountSwitcherPlugin implements Plugin
 
     protected bool|Closure $sessionReplayLink = true;
 
+    /** @var array<int, array<Action>|Closure> */
+    protected array $bannerMenuItems = [];
+
     /** @var class-string<LinkedAccounts> */
     protected string $linkedAccountsPage = LinkedAccounts::class;
 
@@ -324,6 +327,22 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
+     * Items for the ⋯ menu on the impersonation banner, next to Switch back:
+     * Filament actions with a url() (postToUrl() for a POST), or a closure
+     * that returns them: fn (Authenticatable $impersonated, ?Authenticatable $impersonator): array.
+     * Each call adds to the menu; an action named like an earlier one, the
+     * built-in "session-replays" included, replaces it.
+     *
+     * @param  array<Action> | Closure  $items
+     */
+    public function bannerMenuItems(array|Closure $items): static
+    {
+        $this->bannerMenuItems[] = $items;
+
+        return $this;
+    }
+
+    /**
      * @param  class-string<LinkedAccounts>  $page
      */
     public function linkedAccountsPage(string $page): static
@@ -547,6 +566,44 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
+     * The ⋯ menu's visible items while impersonating, keyed by action name:
+     * Session replays when there is a list to open, then the app's own.
+     *
+     * @return array<string, Action>
+     */
+    public function getBannerMenuItems(Authenticatable $impersonated, ?Authenticatable $impersonator): array
+    {
+        $items = [];
+
+        $sessionReplaysRoute = $impersonator && $this->getSessionReplaysUrl($impersonated, $impersonator)
+            ? $this->getSessionReplaysRouteUrl()
+            : null;
+
+        if ($sessionReplaysRoute !== null) {
+            $items['session-replays'] = Action::make('session-replays')
+                ->label(__('packstub-account-switcher::account-switcher.banner.session_replays'))
+                ->tooltip(__('packstub-account-switcher::account-switcher.banner.session_replays_title', ['impersonated' => Filament::getUserName($impersonated)]))
+                ->icon('heroicon-m-play-circle')
+                ->url($sessionReplaysRoute)
+                ->postToUrl();
+        }
+
+        foreach ($this->bannerMenuItems as $group) {
+            if ($group instanceof Closure) {
+                $group = (array) $group($impersonated, $impersonator);
+            }
+
+            foreach ($group as $action) {
+                if ($action instanceof Action) {
+                    $items[$action->getName()] = $action;
+                }
+            }
+        }
+
+        return array_filter($items, fn (Action $action): bool => $action->isVisible());
+    }
+
+    /**
      * @return class-string<LinkedAccounts>
      */
     public function getLinkedAccountsPage(): string
@@ -642,14 +699,11 @@ class AccountSwitcherPlugin implements Plugin
                     }
 
                     $impersonated = Filament::auth()->user();
-                    $impersonator = app(AccountSwitcher::class)->impersonator();
 
                     return view('packstub-account-switcher::banner', [
                         'position' => $this->getBannerPosition(),
                         'style' => $this->getBannerStyle(),
-                        'sessionReplaysUrl' => $impersonated && $impersonator && $this->getSessionReplaysUrl($impersonated, $impersonator)
-                            ? $this->getSessionReplaysRouteUrl()
-                            : null,
+                        'menuItems' => $impersonated ? $this->getBannerMenuItems($impersonated, app(AccountSwitcher::class)->impersonator()) : [],
                     ])->render();
                 }),
             );

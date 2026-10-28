@@ -21,6 +21,7 @@ return [
         'switch_back' => 'Switch back',
         'session_replays' => 'Session replays',
         'session_replays_title' => 'Switch back and open the recordings of :impersonated',
+        'more' => 'More',
     ],
 
     'developer_logins' => [

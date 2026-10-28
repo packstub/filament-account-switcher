@@ -66,7 +66,7 @@ AccountSwitcherPlugin::make()
 
 ![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
-While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button (and, with Filament Session Replay installed, a [**Session replays**](#session-replays) button). It renders at the bottom of every panel page; move it to the top or switch to the light style:
+While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button, and a ⋯ [menu](#the-banner-menu) when there is something to put in it. It renders at the bottom of every panel page; move it to the top or switch to the light style:
 
 ```php
 AccountSwitcherPlugin::make()
@@ -81,22 +81,89 @@ To restyle it completely, publish the views and edit `resources/views/vendor/pac
 php artisan vendor:publish --tag="packstub-account-switcher-views"
 ```
 
-The banner is a plain Blade view with inline styles so it works with any panel theme and doesn't need a custom Tailwind build.
+The banner is a plain Blade view with inline styles so it works with any panel theme and doesn't need a custom Tailwind build. On a phone (below 40rem) the bar is a little taller and the message keeps to two lines beside the buttons. Before publishing the view to add something, look at the [menu](#the-banner-menu) and the [render hooks](#render-hooks): they survive upgrades, a published view does not.
+
+### The banner menu
+
+Next to **Switch back** sits a ⋯ button that opens a menu, so the banner stays one row on a phone however many things you hang on it. It only appears when the menu has items: [Session replays](#session-replays) when Filament Session Replay is installed, and your own.
+
+Your own items are Filament actions with a URL, the same kind you give `userMenuItems()`:
+
+```php
+use Filament\Actions\Action;
+
+AccountSwitcherPlugin::make()
+    ->bannerMenuItems([
+        Action::make('crm')
+            ->label('Open in CRM')
+            ->icon('heroicon-m-arrow-top-right-on-square')
+            ->url('https://crm.example.com', shouldOpenInNewTab: true),
+    ])
+```
+
+Pass a closure to build them from the people involved. It gets the impersonated person and the impersonator (null when that account no longer exists):
+
+```php
+AccountSwitcherPlugin::make()
+    ->bannerMenuItems(fn (User $impersonated, ?User $impersonator): array => [
+        Action::make('orders')
+            ->label('Their orders')
+            ->url(OrderResource::getUrl('index', ['filters' => ['customer' => ['value' => $impersonated->getKey()]]])),
+        Action::make('notes')
+            ->label('Support notes')
+            ->url(route('support.notes', $impersonated))
+            ->visible(fn (): bool => $impersonator?->can('viewSupportNotes') ?? false),
+    ])
+```
+
+- Items render in order, Session replays first; each call to `bannerMenuItems()` adds to the menu.
+- `->postToUrl()` makes an item a CSRF-protected POST form, for an endpoint that changes something, like the built-in Session replays.
+- `->visible()` and `->hidden()` are honoured. An action named like an earlier one replaces it, so `Action::make('session-replays')` relabels or hides the built-in item.
+- Items open URLs; an action with a modal or a Livewire method needs a page, not the banner.
+
+`AccountSwitcherPlugin::get()->getBannerMenuItems($impersonated, $impersonator)` returns the visible items, keyed by name.
+
+### Render hooks
+
+The banner has render hooks of its own, for anything that is not a menu item: a badge, a countdown, a link of your own design. They render only while impersonating, on panels where the plugin is registered.
+
+```php
+use Filament\Support\Facades\FilamentView;
+use Illuminate\Support\Facades\Blade;
+use Packstub\AccountSwitcher\Filament\View\AccountSwitcherRenderHook;
+
+FilamentView::registerRenderHook(
+    AccountSwitcherRenderHook::BANNER_MESSAGE_AFTER,
+    fn (): string => Blade::render('<x-filament::badge color="warning">Production</x-filament::badge>'),
+);
+```
+
+| Hook | Where |
+| --- | --- |
+| `AccountSwitcherRenderHook::BANNER_START` | First thing in the banner, before the message |
+| `AccountSwitcherRenderHook::BANNER_MESSAGE_AFTER` | Right after the message |
+| `AccountSwitcherRenderHook::BANNER_ACTIONS_BEFORE` | Before **Switch back** |
+| `AccountSwitcherRenderHook::BANNER_MENU_BEFORE` | Inside the ⋯ menu, before its items |
+| `AccountSwitcherRenderHook::BANNER_MENU_AFTER` | Inside the ⋯ menu, after its items |
+| `AccountSwitcherRenderHook::BANNER_ACTIONS_AFTER` | After the ⋯ menu |
+| `AccountSwitcherRenderHook::BANNER_END` | Last thing in the banner |
+
+The two menu hooks take dropdown items (`<x-filament::dropdown.list.item>`), and either one alone is enough for the ⋯ button to appear. Keep anything in the bar itself small: the banner is 3rem high, 3.5rem on a phone.
 
 ### Session replays
 
-With [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) on a panel, the banner gets a second button, **Session replays**. Impersonation and replay answer the same support question from two sides: "let me see it as they do" and "let me see what they did". Session Replay already names the impersonator on a recording made while impersonating; this button is the way back: it ends the impersonation and opens the Sessions list filtered to the person you were signed in as.
+With [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) on a panel, the banner menu gets **Session replays**. Impersonation and replay answer the same support question from two sides: "let me see it as they do" and "let me see what they did". Session Replay already names the impersonator on a recording made while impersonating; this item is the way back: it ends the impersonation and opens the Sessions list filtered to the person you were signed in as.
 
-It ends the impersonation first because the session is theirs until you switch back, and the list is yours: Session Replay's `viewSessionReplay` gate (or its policy) is asked about *you*, the impersonator, never about the impersonated person. The list opens in the current panel when it has the Sessions resource, else in the first panel that does and that you may access; in a panel with tenancy it is the current workspace's list, when you belong to that workspace, else the next panel. The button is not rendered when no such panel exists, when the gate says no, or on a tenant-less page of a panel with tenancy.
+It ends the impersonation first because the session is theirs until you switch back, and the list is yours: Session Replay's `viewSessionReplay` gate (or its policy) is asked about *you*, the impersonator, never about the impersonated person. The list opens in the current panel when it has the Sessions resource, else in the first panel that does and that you may access; in a panel with tenancy it is the current workspace's list, when you belong to that workspace, else the next panel. The item is left out when no such panel exists, when the gate says no, or on a tenant-less page of a panel with tenancy.
 
-Nothing to configure; Session Replay is detected with a `class_exists()` check, the same way it detects this plugin. To leave the banner at **Switch back** alone:
+Nothing to configure; Session Replay is detected with a `class_exists()` check, the same way it detects this plugin. To leave it out:
 
 ```php
 AccountSwitcherPlugin::make()
     ->sessionReplayLink(false)
 ```
 
-The button posts to `filament.{panel}.account-switcher.session-replays`, a CSRF-protected route under the panel's authenticated (and, with tenancy, tenant) routes; `AccountSwitcherPlugin::get()->getSessionReplaysUrl($impersonated, $impersonator)` is the URL it lands on, or null. Requires Filament Session Replay 1.1.
+The item posts to `filament.{panel}.account-switcher.session-replays`, a CSRF-protected route under the panel's authenticated (and, with tenancy, tenant) routes; `AccountSwitcherPlugin::get()->getSessionReplaysUrl($impersonated, $impersonator)` is the URL it lands on, or null. Requires Filament Session Replay 1.1.
 
 ## Landing on a hidden page
 

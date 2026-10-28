@@ -6,7 +6,16 @@ All notable changes to `packstub/filament-account-switcher` are documented here.
 
 ### Added
 
-- **Session replays from the impersonation banner** (#27): with [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) 1.1 on a panel, the banner offers **Session replays** next to **Switch back**. It ends the impersonation and opens the Sessions list filtered to the person who was impersonated, in the current panel when it has the resource, else in the first panel that does and the impersonator may access; in a panel with tenancy, the current workspace's list. Session Replay's gate is asked about the impersonator, not the impersonated person, and the button only renders when there is a list to open. Detected with `class_exists()`, nothing to install; `->sessionReplayLink(false)` turns it off. New route `filament.{panel}.account-switcher.session-replays` (POST), new strings `banner.session_replays` and `banner.session_replays_title`. See [Impersonation](docs/impersonation.md#session-replays).
+- **A menu on the impersonation banner, and render hooks inside it** (#30): a ⋯ button next to **Switch back** opens a menu for links that only make sense while impersonating. Add your own with `AccountSwitcherPlugin::make()->bannerMenuItems([...])`: Filament actions with a URL (`->postToUrl()` for a POST), or a closure that gets the impersonated person and the impersonator. An action named like an earlier one replaces it. The button only appears when the menu has items. New render hooks on `Packstub\AccountSwitcher\Filament\View\AccountSwitcherRenderHook` (`BANNER_START`, `BANNER_MESSAGE_AFTER`, `BANNER_ACTIONS_BEFORE`, `BANNER_ACTIONS_AFTER`, `BANNER_MENU_BEFORE`, `BANNER_MENU_AFTER`, `BANNER_END`) cover anything else, so the view no longer has to be published for an addition. See [Impersonation](docs/impersonation.md#the-banner-menu).
+- **Session replays from the impersonation banner** (#27): with [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) 1.1 on a panel, the banner menu offers **Session replays**. It ends the impersonation and opens the Sessions list filtered to the person who was impersonated, in the current panel when it has the resource, else in the first panel that does and the impersonator may access; in a panel with tenancy, the current workspace's list. Session Replay's gate is asked about the impersonator, not the impersonated person, and the item only appears when there is a list to open. Detected with `class_exists()`, nothing to install; `->sessionReplayLink(false)` turns it off. New route `filament.{panel}.account-switcher.session-replays` (POST). See [Impersonation](docs/impersonation.md#session-replays).
+
+### Fixed
+
+- **The impersonation banner on phones**: the bar was a fixed 3rem high, so on a narrow screen the message wrapped to three lines and its first line showed above the bar, over the page. Below 40rem the bar is now 3.5rem and the message keeps to two lines beside the buttons, which no longer break inside themselves. The height is the `--fi-account-switcher-banner-height` CSS variable, which the top position's offsets follow too.
+
+### Changed
+
+- New strings `banner.session_replays`, `banner.session_replays_title` and `banner.more`. A published `banner.blade.php` keeps working, without the menu and the hooks; republish it to get them. Its styles now target the banner's own classes instead of every `button` and `form` inside it.
 
 ## 4.3.0 — 2026-10-27
 

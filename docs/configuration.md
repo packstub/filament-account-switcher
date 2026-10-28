@@ -5,6 +5,7 @@ Most settings live on the plugin so each panel can differ; a small config file h
 ## The plugin API
 
 ```php
+use Filament\Actions\Action;
 use Filament\View\PanelsRenderHook;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
 
@@ -48,13 +49,16 @@ AccountSwitcherPlugin::make()
     ->banner(position: 'bottom', style: 'dark')
     ->linkedAccountsPage(App\Filament\Pages\LinkedAccounts::class)
 
-    // The "Session replays" button on the banner, with Filament Session Replay installed (on by default)
+    // The banner's ⋯ menu: "Session replays" with Filament Session Replay installed (on by default), and your own items
     ->sessionReplayLink(true)
+    ->bannerMenuItems(fn (User $impersonated, ?User $impersonator): array => [
+        Action::make('crm')->label('Open in CRM')->url("https://crm.example.com/people/{$impersonated->getKey()}"),
+    ])
 ```
 
 ### Banner placement
 
-`banner(position: 'top', style: 'light')` renders the impersonation banner at the top of the page in the light style; the default is a dark banner at the bottom.
+`banner(position: 'top', style: 'light')` renders the impersonation banner at the top of the page in the light style; the default is a dark banner at the bottom. Its ⋯ menu and render hooks are in [Impersonation](impersonation.md#the-banner-menu).
 
 ![The impersonation banner at the top of the page in the light style](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner-top-light.png)
 
@@ -65,7 +69,7 @@ AccountSwitcherPlugin::make()
 | `impersonation()` | on | `ImpersonateAction` hidden, switch-back route not registered, banner not rendered, `impersonate()` throws |
 | `linkedAccounts()` | on | No "Switch to" menu, no Linked accounts page or user menu item, `switchToLinkedAccount()` throws |
 | `developerLogins()` | **off** | No buttons, developer-login route not registered |
-| `sessionReplayLink()` | on | No **Session replays** button on the banner (see [Impersonation](impersonation.md#session-replays)); it only ever renders with Filament Session Replay installed |
+| `sessionReplayLink()` | on | No **Session replays** item in the banner menu (see [Impersonation](impersonation.md#session-replays)); it only ever appears with Filament Session Replay installed |
 
 Each accepts a `Closure` for runtime decisions, e.g. `->impersonation(fn (): bool => config('features.impersonation'))`.
 
