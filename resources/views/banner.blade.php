@@ -38,6 +38,12 @@
         color: {{ $dark ? '#111827' : '#f9fafb' }};
     }
 
+    .fi-account-switcher-banner button.fi-account-switcher-banner-secondary {
+        background-color: transparent;
+        color: inherit;
+        border: 1px solid {{ $dark ? '#4b5563' : '#9ca3af' }};
+    }
+
     @if ($position === 'top')
         {{-- Push the whole shell down and re-anchor Filament's sticky elements below the banner.
              v5 keeps the topbar in a sticky .fi-topbar-ctn outside .fi-layout; v4 has a sticky .fi-topbar inside it. --}}
@@ -88,5 +94,16 @@
             @csrf
             <button type="submit">{{ __('packstub-account-switcher::account-switcher.banner.switch_back') }}</button>
         </form>
+
+        @if ($sessionReplaysUrl ?? null)
+            <form method="POST" action="{{ $sessionReplaysUrl }}">
+                @csrf
+                <button
+                    type="submit"
+                    class="fi-account-switcher-banner-secondary"
+                    title="{{ __('packstub-account-switcher::account-switcher.banner.session_replays_title', ['impersonated' => Filament::getUserName($impersonated)]) }}"
+                >{{ __('packstub-account-switcher::account-switcher.banner.session_replays') }}</button>
+            </form>
+        @endif
     @endif
 </div>

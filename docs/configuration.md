@@ -47,6 +47,9 @@ AccountSwitcherPlugin::make()
     ->switcherRenderHook(PanelsRenderHook::USER_MENU_BEFORE)
     ->banner(position: 'bottom', style: 'dark')
     ->linkedAccountsPage(App\Filament\Pages\LinkedAccounts::class)
+
+    // The "Session replays" button on the banner, with Filament Session Replay installed (on by default)
+    ->sessionReplayLink(true)
 ```
 
 ### Banner placement
@@ -62,6 +65,7 @@ AccountSwitcherPlugin::make()
 | `impersonation()` | on | `ImpersonateAction` hidden, switch-back route not registered, banner not rendered, `impersonate()` throws |
 | `linkedAccounts()` | on | No "Switch to" menu, no Linked accounts page or user menu item, `switchToLinkedAccount()` throws |
 | `developerLogins()` | **off** | No buttons, developer-login route not registered |
+| `sessionReplayLink()` | on | No **Session replays** button on the banner (see [Impersonation](impersonation.md#session-replays)); it only ever renders with Filament Session Replay installed |
 
 Each accepts a `Closure` for runtime decisions, e.g. `->impersonation(fn (): bool => config('features.impersonation'))`.
 

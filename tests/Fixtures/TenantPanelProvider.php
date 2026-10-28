@@ -16,6 +16,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Packstub\AccountSwitcher\AccountSwitcherPlugin;
+use Packstub\SessionReplay\SessionReplayPlugin;
 
 /**
  * A tenant-aware panel: the linked accounts page lives under `{tenant}`.
@@ -45,6 +46,9 @@ class TenantPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->plugin(AccountSwitcherPlugin::make());
+            ->plugins([
+                AccountSwitcherPlugin::make(),
+                SessionReplayPlugin::make()->record(false),
+            ]);
     }
 }

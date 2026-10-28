@@ -23,7 +23,7 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 | --- | --- |
 | [Installation](installation.md) | Requirements, the install command, the user model trait, and registering the plugin |
 | [Linked accounts](linked-accounts.md) | The "Switch to" menu, the Linked accounts page, sub-accounts, and the password rule |
-| [Impersonation](impersonation.md) | The action, the banner, authorization hooks, and switching back |
+| [Impersonation](impersonation.md) | The action, the banner, authorization hooks, switching back, and the Session replays button |
 | [Developer logins](developer-logins.md) | Login-page buttons for local development and how they are gated |
 | [Configuration](configuration.md) | The fluent `AccountSwitcherPlugin` API, the config file, events, the switch log, and the facade |
 | [Security](security.md) | The threat model behind each feature and the guarantees the plugin makes |

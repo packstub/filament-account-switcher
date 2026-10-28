@@ -2,6 +2,12 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+### Added
+
+- **Session replays from the impersonation banner** (#27): with [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) 1.1 on a panel, the banner offers **Session replays** next to **Switch back**. It ends the impersonation and opens the Sessions list filtered to the person who was impersonated, in the current panel when it has the resource, else in the first panel that does and the impersonator may access; in a panel with tenancy, the current workspace's list. Session Replay's gate is asked about the impersonator, not the impersonated person, and the button only renders when there is a list to open. Detected with `class_exists()`, nothing to install; `->sessionReplayLink(false)` turns it off. New route `filament.{panel}.account-switcher.session-replays` (POST), new strings `banner.session_replays` and `banner.session_replays_title`. See [Impersonation](docs/impersonation.md#session-replays).
+
 ## 4.3.0 — 2026-10-27
 
 ### Added

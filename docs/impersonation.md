@@ -66,7 +66,7 @@ AccountSwitcherPlugin::make()
 
 ![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
-While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button. It renders at the bottom of every panel page; move it to the top or switch to the light style:
+While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button (and, with Filament Session Replay installed, a [**Session replays**](#session-replays) button). It renders at the bottom of every panel page; move it to the top or switch to the light style:
 
 ```php
 AccountSwitcherPlugin::make()
@@ -82,6 +82,21 @@ php artisan vendor:publish --tag="packstub-account-switcher-views"
 ```
 
 The banner is a plain Blade view with inline styles so it works with any panel theme and doesn't need a custom Tailwind build.
+
+### Session replays
+
+With [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) on a panel, the banner gets a second button, **Session replays**. Impersonation and replay answer the same support question from two sides: "let me see it as they do" and "let me see what they did". Session Replay already names the impersonator on a recording made while impersonating; this button is the way back: it ends the impersonation and opens the Sessions list filtered to the person you were signed in as.
+
+It ends the impersonation first because the session is theirs until you switch back, and the list is yours: Session Replay's `viewSessionReplay` gate (or its policy) is asked about *you*, the impersonator, never about the impersonated person. The list opens in the current panel when it has the Sessions resource, else in the first panel that does and that you may access; in a panel with tenancy it is the current workspace's list, when you belong to that workspace, else the next panel. The button is not rendered when no such panel exists, when the gate says no, or on a tenant-less page of a panel with tenancy.
+
+Nothing to configure; Session Replay is detected with a `class_exists()` check, the same way it detects this plugin. To leave the banner at **Switch back** alone:
+
+```php
+AccountSwitcherPlugin::make()
+    ->sessionReplayLink(false)
+```
+
+The button posts to `filament.{panel}.account-switcher.session-replays`, a CSRF-protected route under the panel's authenticated (and, with tenancy, tenant) routes; `AccountSwitcherPlugin::get()->getSessionReplaysUrl($impersonated, $impersonator)` is the URL it lands on, or null. Requires Filament Session Replay 1.1.
 
 ## Landing on a hidden page
 

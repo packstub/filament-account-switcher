@@ -9,6 +9,7 @@ use Filament\FilamentServiceProvider;
 use Filament\Forms\FormsServiceProvider;
 use Filament\Infolists\InfolistsServiceProvider;
 use Filament\Notifications\NotificationsServiceProvider;
+use Filament\QueryBuilder\QueryBuilderServiceProvider;
 use Filament\Schemas\SchemasServiceProvider;
 use Filament\Support\SupportServiceProvider;
 use Filament\Tables\TablesServiceProvider;
@@ -23,6 +24,8 @@ use Packstub\AccountSwitcher\Tests\Fixtures\AdminPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\LitePanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\TenantPanelProvider;
 use Packstub\AccountSwitcher\Tests\Fixtures\User;
+use Packstub\SessionReplay\Filament\FilamentSessionReplayServiceProvider;
+use Packstub\SessionReplay\SessionReplayServiceProvider;
 use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -45,6 +48,7 @@ abstract class TestCase extends Orchestra
             FormsServiceProvider::class,
             InfolistsServiceProvider::class,
             NotificationsServiceProvider::class,
+            QueryBuilderServiceProvider::class,
             SchemasServiceProvider::class,
             SupportServiceProvider::class,
             TablesServiceProvider::class,
@@ -54,6 +58,9 @@ abstract class TestCase extends Orchestra
             LivewireServiceProvider::class,
             AccountSwitcherServiceProvider::class,
             FilamentAccountSwitcherServiceProvider::class,
+            // Filament Session Replay: the admin and the tenant panel list its recordings (nothing is recorded in tests).
+            SessionReplayServiceProvider::class,
+            FilamentSessionReplayServiceProvider::class,
             AdminPanelProvider::class,
             TenantPanelProvider::class,
             LitePanelProvider::class,
