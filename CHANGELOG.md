@@ -2,6 +2,12 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+### Fixed
+
+- **"Switch to" on a phone**: below the `sm` breakpoint the topbar button is just its icon (labelled "Switch to" for screen readers), so it no longer wraps onto two lines next to the other topbar items. From `sm` up it is unchanged.
+
 ## 4.3.0 — 2026-10-27
 
 ### Added
