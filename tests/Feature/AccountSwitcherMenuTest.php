@@ -20,6 +20,18 @@ it('lists linked accounts in the topbar', function (): void {
         ->assertSee('Manage linked accounts');
 });
 
+it('shows just the icon on a phone, labelled for screen readers, and the label from sm up', function (): void {
+    $admin = createAdmin();
+    $admin->linkAccount(createUser(), label: 'Daily');
+
+    $this->actingAs($admin);
+
+    $this->get('/admin')
+        ->assertOk()
+        ->assertSee('fi-labeled-from-sm', escape: false)
+        ->assertSee('aria-label="Switch to"', escape: false);
+});
+
 it('is hidden without linked accounts', function (): void {
     $this->actingAs(createAdmin());
 

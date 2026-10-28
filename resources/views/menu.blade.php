@@ -2,7 +2,8 @@
     @if ($accounts->isNotEmpty() || $hasDeveloperLogins || $hasDeveloperLoginSearch)
         <x-filament::dropdown placement="bottom-end" width="sm">
             <x-slot name="trigger">
-                <x-filament::button color="gray" size="sm" icon="heroicon-o-user" outlined>
+                {{-- Just the icon on a phone, where the label wraps onto two lines in a full topbar. --}}
+                <x-filament::button color="gray" size="sm" icon="heroicon-o-user" outlined labeled-from="sm">
                     {{ __('packstub-account-switcher::account-switcher.menu.switch_to') }}
                 </x-filament::button>
             </x-slot>
