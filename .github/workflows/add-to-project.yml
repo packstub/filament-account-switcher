@@ -1,7 +1,7 @@
 name: Add to Plugins board
 
-# New issues and pull requests land on the Plugins project (github.com/users/icaliman/projects/3).
-# PROJECTS_TOKEN is a fine-grained personal access token with read and write on Projects, set per repo.
+# New issues and pull requests land on the Plugins project (github.com/orgs/packstub/projects/1).
+# PROJECTS_TOKEN is a fine-grained personal access token with read and write on Projects, set per repo (resource owner packstub, org permission Projects).
 
 on:
   issues:
@@ -18,5 +18,5 @@ jobs:
     steps:
       - uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # v2.0.0
         with:
-          project-url: https://github.com/users/icaliman/projects/3
+          project-url: https://github.com/orgs/packstub/projects/1
           github-token: ${{ secrets.PROJECTS_TOKEN }}
