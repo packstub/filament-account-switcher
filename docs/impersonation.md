@@ -64,7 +64,7 @@ AccountSwitcherPlugin::make()
 
 ## The banner
 
-![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
+![The impersonation banner at the bottom of the panel with a Switch back button and a ⋮ menu](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
 While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button, and a ⋮ [menu](#the-banner-menu) when there is something to put in it. It renders at the bottom of every panel page; move it to the top or switch to the light style:
 
@@ -86,6 +86,8 @@ The banner is a plain Blade view with inline styles so it works with any panel t
 ### The banner menu
 
 Next to **Switch back** sits a ⋮ button that opens a menu, so the banner stays one row on a phone however many things you hang on it. It only appears when the menu has items: [Session replays](#session-replays) when Filament Session Replay is installed, and your own.
+
+![The banner's ⋮ menu open above the banner, with a Session replays item](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner-menu.png)
 
 Your own items are Filament actions with a URL, the same kind you give `userMenuItems()`:
 
