@@ -66,7 +66,7 @@ AccountSwitcherPlugin::make()
 
 ![The impersonation banner at the bottom of the panel with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 
-While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button, and a ⋯ [menu](#the-banner-menu) when there is something to put in it. It renders at the bottom of every panel page; move it to the top or switch to the light style:
+While impersonating, a fixed banner reads *"You are signed in as Jane, impersonating from Admin"* with a **Switch back** button, and a ⋮ [menu](#the-banner-menu) when there is something to put in it. It renders at the bottom of every panel page; move it to the top or switch to the light style:
 
 ```php
 AccountSwitcherPlugin::make()
@@ -85,7 +85,7 @@ The banner is a plain Blade view with inline styles so it works with any panel t
 
 ### The banner menu
 
-Next to **Switch back** sits a ⋯ button that opens a menu, so the banner stays one row on a phone however many things you hang on it. It only appears when the menu has items: [Session replays](#session-replays) when Filament Session Replay is installed, and your own.
+Next to **Switch back** sits a ⋮ button that opens a menu, so the banner stays one row on a phone however many things you hang on it. It only appears when the menu has items: [Session replays](#session-replays) when Filament Session Replay is installed, and your own.
 
 Your own items are Filament actions with a URL, the same kind you give `userMenuItems()`:
 
@@ -143,12 +143,12 @@ FilamentView::registerRenderHook(
 | `AccountSwitcherRenderHook::BANNER_START` | First thing in the banner, before the message |
 | `AccountSwitcherRenderHook::BANNER_MESSAGE_AFTER` | Right after the message |
 | `AccountSwitcherRenderHook::BANNER_ACTIONS_BEFORE` | Before **Switch back** |
-| `AccountSwitcherRenderHook::BANNER_MENU_BEFORE` | Inside the ⋯ menu, before its items |
-| `AccountSwitcherRenderHook::BANNER_MENU_AFTER` | Inside the ⋯ menu, after its items |
-| `AccountSwitcherRenderHook::BANNER_ACTIONS_AFTER` | After the ⋯ menu |
+| `AccountSwitcherRenderHook::BANNER_MENU_BEFORE` | Inside the ⋮ menu, before its items |
+| `AccountSwitcherRenderHook::BANNER_MENU_AFTER` | Inside the ⋮ menu, after its items |
+| `AccountSwitcherRenderHook::BANNER_ACTIONS_AFTER` | After the ⋮ menu |
 | `AccountSwitcherRenderHook::BANNER_END` | Last thing in the banner |
 
-The two menu hooks take dropdown items (`<x-filament::dropdown.list.item>`), and either one alone is enough for the ⋯ button to appear. Keep anything in the bar itself small: the banner is 3rem high, 3.5rem on a phone.
+The two menu hooks take dropdown items (`<x-filament::dropdown.list.item>`), and either one alone is enough for the ⋮ button to appear. Keep anything in the bar itself small: the banner is 3rem high, 3.5rem on a phone.
 
 ### Session replays
 

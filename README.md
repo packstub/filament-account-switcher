@@ -105,7 +105,7 @@ use Packstub\AccountSwitcher\Filament\Actions\ImpersonateAction;
 
 ![The Impersonate action on each row of the users table](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonate-action.png)
 
-While impersonating, a banner stays visible on every page with a **Switch back** button and a ⋯ menu for your own links. With [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) on the panel the menu offers **Session replays**: switch back and land on that person's recordings.
+While impersonating, a banner stays visible on every page with a **Switch back** button and a ⋮ menu for your own links. With [Filament Session Replay](https://packstub.dev/docs/filament-session-replay) on the panel the menu offers **Session replays**: switch back and land on that person's recordings.
 
 ![The impersonation banner with a Switch back button](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner.png)
 

@@ -17,13 +17,13 @@ class AccountSwitcherRenderHook
     /** Before the Switch back button, in the banner's row of buttons. */
     public const BANNER_ACTIONS_BEFORE = 'packstub-account-switcher::banner.actions.before';
 
-    /** After the ⋯ menu, at the end of the banner's row of buttons. */
+    /** After the ⋮ menu, at the end of the banner's row of buttons. */
     public const BANNER_ACTIONS_AFTER = 'packstub-account-switcher::banner.actions.after';
 
-    /** Inside the ⋯ menu, before its items. Return dropdown list items (<x-filament::dropdown.list.item>). */
+    /** Inside the ⋮ menu, before its items. Return dropdown list items (<x-filament::dropdown.list.item>). */
     public const BANNER_MENU_BEFORE = 'packstub-account-switcher::banner.menu.before';
 
-    /** Inside the ⋯ menu, after its items. Return dropdown list items (<x-filament::dropdown.list.item>). */
+    /** Inside the ⋮ menu, after its items. Return dropdown list items (<x-filament::dropdown.list.item>). */
     public const BANNER_MENU_AFTER = 'packstub-account-switcher::banner.menu.after';
 
     /** Last thing inside the banner. */

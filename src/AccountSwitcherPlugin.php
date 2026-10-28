@@ -327,7 +327,7 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
-     * Items for the ⋯ menu on the impersonation banner, next to Switch back:
+     * Items for the ⋮ menu on the impersonation banner, next to Switch back:
      * Filament actions with a url() (postToUrl() for a POST), or a closure
      * that returns them: fn (Authenticatable $impersonated, ?Authenticatable $impersonator): array.
      * Each call adds to the menu; an action named like an earlier one, the
@@ -566,7 +566,7 @@ class AccountSwitcherPlugin implements Plugin
     }
 
     /**
-     * The ⋯ menu's visible items while impersonating, keyed by action name:
+     * The ⋮ menu's visible items while impersonating, keyed by action name:
      * Session replays when there is a list to open, then the app's own.
      *
      * @return array<string, Action>

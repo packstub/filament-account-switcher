@@ -49,7 +49,7 @@ AccountSwitcherPlugin::make()
     ->banner(position: 'bottom', style: 'dark')
     ->linkedAccountsPage(App\Filament\Pages\LinkedAccounts::class)
 
-    // The banner's ⋯ menu: "Session replays" with Filament Session Replay installed (on by default), and your own items
+    // The banner's ⋮ menu: "Session replays" with Filament Session Replay installed (on by default), and your own items
     ->sessionReplayLink(true)
     ->bannerMenuItems(fn (User $impersonated, ?User $impersonator): array => [
         Action::make('crm')->label('Open in CRM')->url("https://crm.example.com/people/{$impersonated->getKey()}"),
@@ -58,7 +58,7 @@ AccountSwitcherPlugin::make()
 
 ### Banner placement
 
-`banner(position: 'top', style: 'light')` renders the impersonation banner at the top of the page in the light style; the default is a dark banner at the bottom. Its ⋯ menu and render hooks are in [Impersonation](impersonation.md#the-banner-menu).
+`banner(position: 'top', style: 'light')` renders the impersonation banner at the top of the page in the light style; the default is a dark banner at the bottom. Its ⋮ menu and render hooks are in [Impersonation](impersonation.md#the-banner-menu).
 
 ![The impersonation banner at the top of the page in the light style](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/impersonation-banner-top-light.png)
 

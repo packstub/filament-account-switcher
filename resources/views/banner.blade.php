@@ -181,7 +181,7 @@
                         aria-label="{{ __('packstub-account-switcher::account-switcher.banner.more') }}"
                         title="{{ __('packstub-account-switcher::account-switcher.banner.more') }}"
                     >
-                        {{ \Filament\Support\generate_icon_html('heroicon-m-ellipsis-horizontal') }}
+                        {{ \Filament\Support\generate_icon_html('heroicon-m-ellipsis-vertical') }}
                     </button>
                 </x-slot>
 
