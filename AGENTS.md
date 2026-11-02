@@ -28,7 +28,7 @@ composer update packstub/account-switcher
 
 ## Conventions
 
-- Every change needs a Pest test; `CHANGELOG.md` and `UPGRADE.md` stay current.
+- Every change needs a Pest test; `CHANGELOG.md` and `UPGRADE.md` stay current. A `CHANGELOG.md` section becomes the GitHub release and `github-release.yml` appends GitHub's list of merged pull requests under it, so keep it short and human: an optional lead sentence, then at most about six one-line bullets saying what a user gets, in plain words (class or method names only when a user needs the name, never lists of them). Always keep breaking changes with an `**Upgrading:**` line, security or privacy fixes, new minimum PHP/Laravel/Filament versions and migrations to run; the detail goes in the docs and `UPGRADE.md`, CI, tests and refactors stay out.
 - Session handling, authorization and the audit log belong to the core. If a change needs them, make it there, require the new core minor here, and run this suite after a change in the core.
 - Config keys, route names, the session key, the translation keys and the `SwitchContext` methods are shared with the core; they must not change inside a major.
 - Naming by channel: **Filament Account Switcher** on packstub.dev, **Packstub Account Switcher** on filamentphp.com.
