@@ -1,0 +1,5 @@
+# Generated release notes (the PR list under the CHANGELOG summary).
+changelog:
+  exclude:
+    authors:
+      - dependabot[bot]

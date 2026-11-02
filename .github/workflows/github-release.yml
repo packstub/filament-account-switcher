@@ -41,8 +41,24 @@ jobs:
           if [ -s release-notes.md ]; then
             echo "Notes from CHANGELOG.md:"; cat release-notes.md
           else
-            echo "No \"## $version\" section in CHANGELOG.md; GitHub will generate the notes from the commits."
+            echo "No \"## $version\" section in CHANGELOG.md; only the merged pull requests go in the notes."
           fi
+
+      # GitHub's list of merged pull requests under the summary (Dependabot is left
+      # out by .github/release.yml). The maintainer's own "first contribution" line
+      # is dropped, and the New Contributors heading with it when nobody is left.
+      - name: Append the merged pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Relative links (docs/x.md, UPGRADE.md) work in the repo, not on a release page.
+          perl -pi -e 's{\]\((?![a-z][a-z0-9+.-]*:|#|/)([^)\s]+)\)}{](https://github.com/$ENV{GITHUB_REPOSITORY}/blob/$ENV{TAG}/$1)}g' release-notes.md
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$TAG" -q .body \
+            | perl -0pe 's/^\* \@icaliman made their first contribution[^\n]*\n//mg; s/^## New Contributors\n+(?=\*\*Full Changelog|\z)//mg' \
+            > generated.md
+          if [ -s release-notes.md ]; then echo >> release-notes.md; fi
+          cat generated.md >> release-notes.md
+          cat release-notes.md
 
       - name: Create the release
         env:
@@ -52,8 +68,4 @@ jobs:
             echo "Release $TAG already exists; skipping."
             exit 0
           fi
-          if [ -s release-notes.md ]; then
-            gh release create "$TAG" --title "$TAG" --notes-file release-notes.md --verify-tag
-          else
-            gh release create "$TAG" --title "$TAG" --generate-notes --verify-tag
-          fi
+          gh release create "$TAG" --title "$TAG" --notes-file release-notes.md --verify-tag
