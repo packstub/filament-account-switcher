@@ -51,6 +51,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Relative links (docs/x.md, UPGRADE.md) work in the repo, not on a release page.
+          perl -pi -e 's{\]\((?![a-z][a-z0-9+.-]*:|#|/)([^)\s]+)\)}{](https://github.com/$ENV{GITHUB_REPOSITORY}/blob/$ENV{TAG}/$1)}g' release-notes.md
           gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$TAG" -q .body \
             | perl -0pe 's/^\* \@icaliman made their first contribution[^\n]*\n//mg; s/^## New Contributors\n+(?=\*\*Full Changelog|\z)//mg' \
             > generated.md
