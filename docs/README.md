@@ -9,6 +9,8 @@ Switch between accounts in a Filament panel without signing out — safely, in p
 - Support: [GitHub issues](https://github.com/packstub/filament-account-switcher/issues)
 - Without Filament: [Account Switcher for Laravel](https://packstub.dev/docs/account-switcher), the core this plugin builds on
 
+![Filament Account Switcher: the admin impersonates a user from the users table, the banner says so, Switch back returns in one click, then the Switch to menu lists the linked accounts](https://raw.githubusercontent.com/packstub/art/main/filament-account-switcher/docs/account-switcher.gif)
+
 ## Features
 
 - **[Linked accounts](linked-accounts.md)**: work from a low-privilege account and switch up to admin only when you need it.
