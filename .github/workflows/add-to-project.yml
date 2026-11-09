@@ -6,7 +6,8 @@ name: Add to Plugins board
 on:
   issues:
     types: [opened, reopened]
-  pull_request:
+  # Fork PRs get no secrets on pull_request. Safe only because this job never checks out or runs the PR's code: keep it so.
+  pull_request_target:
     types: [opened, reopened]
 
 permissions: {}
