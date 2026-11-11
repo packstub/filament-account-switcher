@@ -34,13 +34,7 @@ jobs:
       - name: Sync docs/ into resources/docs/filament-account-switcher/1.x/
         run: |
           mkdir -p /tmp/store/resources/docs/filament-account-switcher/1.x
-          rsync -a --delete docs/ /tmp/store/resources/docs/filament-account-switcher/1.x/
-          # The screenshots also go where the store keeps published images, which packstub:art:publish mirrors
-          # to packstub/art (the URLs the README and the docs link).
-          if [ -d docs/images ]; then
-            mkdir -p /tmp/store/public/images/plugins/filament-account-switcher/docs
-            rsync -a --delete docs/images/ /tmp/store/public/images/plugins/filament-account-switcher/docs/
-          fi
+          rsync -a --delete --exclude /images/ docs/ /tmp/store/resources/docs/filament-account-switcher/1.x/
 
       - name: Commit and push if changed
         working-directory: /tmp/store
@@ -48,7 +42,6 @@ jobs:
           git config user.name "packstub-bot"
           git config user.email "support@packstub.dev"
           git add -A resources/docs/filament-account-switcher
-          if [ -d public/images/plugins/filament-account-switcher/docs ]; then git add -A public/images/plugins/filament-account-switcher/docs; fi
           if git diff --cached --quiet; then
             echo "Storefront docs already up to date."
           else
@@ -61,3 +54,38 @@ jobs:
               git pull --rebase origin main
             done
           fi
+
+  art:
+    name: Push docs/images/ to packstub/art (the URLs the README and the docs link)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout plugin repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Push screenshots to packstub/art filament-account-switcher/docs/
+        env:
+          ART_DEPLOY_KEY: ${{ secrets.ART_DEPLOY_KEY }}
+        run: |
+          if [ ! -d docs/images ]; then echo "No docs/images, nothing to publish."; exit 0; fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$ART_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git clone --depth 1 git@github.com:packstub/art.git /tmp/art
+          # No --delete: links point at main, so a renamed or removed screenshot stays for older tags' READMEs and docs.
+          mkdir -p /tmp/art/filament-account-switcher/docs
+          rsync -a --exclude .DS_Store docs/images/ /tmp/art/filament-account-switcher/docs/
+          cd /tmp/art
+          git config user.name "packstub-bot"
+          git config user.email "support@packstub.dev"
+          git add -A filament-account-switcher/docs
+          if git diff --cached --quiet; then echo "Screenshots already up to date."; exit 0; fi
+          git commit -m "filament-account-switcher: screenshots from packstub/filament-account-switcher@${GITHUB_SHA::7}"
+          # Every plugin and the store push to packstub/art: replay on top and retry (each writes its own folder).
+          for attempt in 1 2 3 4 5; do
+            git push origin main && break
+            [ "$attempt" -lt 5 ] || exit 1
+            sleep $((attempt * 5))
+            git pull --rebase origin main
+          done
