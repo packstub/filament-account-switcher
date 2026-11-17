@@ -2,6 +2,10 @@
 
 All notable changes to `packstub/filament-account-switcher` are documented here.
 
+## Unreleased
+
+- `composer.json`'s homepage points at the package's page on packstub.dev
+
 ## 4.4.0 — 2026-10-28
 
 - A ⋮ menu on the impersonation banner; add your own links with `->bannerMenuItems([...])` (#30)
