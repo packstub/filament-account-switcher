@@ -45,8 +45,9 @@ jobs:
           fi
 
       # GitHub's list of merged pull requests under the summary (Dependabot is left
-      # out by .github/release.yml). The maintainer's own "first contribution" line
-      # is dropped, and the New Contributors heading with it when nobody is left.
+      # out by .github/release.yml, which can't touch New Contributors). The maintainer's
+      # and Dependabot's "first contribution" lines are dropped, and the New Contributors
+      # heading with them when nobody is left.
       - name: Append the merged pull requests
         env:
           GH_TOKEN: ${{ github.token }}
@@ -54,7 +55,7 @@ jobs:
           # Relative links (docs/x.md, UPGRADE.md) work in the repo, not on a release page.
           perl -pi -e 's{\]\((?![a-z][a-z0-9+.-]*:|#|/)([^)\s]+)\)}{](https://github.com/$ENV{GITHUB_REPOSITORY}/blob/$ENV{TAG}/$1)}g' release-notes.md
           gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$TAG" -q .body \
-            | perl -0pe 's/^\* \@icaliman made their first contribution[^\n]*\n//mg; s/^## New Contributors\n+(?=\*\*Full Changelog|\z)//mg' \
+            | perl -0pe 's/^\* \@(?:icaliman|dependabot\[bot\]) made their first contribution[^\n]*\n//mg; s/^## New Contributors\n+(?=\*\*Full Changelog|\z)//mg' \
             > generated.md
           if [ -s release-notes.md ]; then echo >> release-notes.md; fi
           cat generated.md >> release-notes.md
