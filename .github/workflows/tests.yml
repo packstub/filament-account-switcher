@@ -1,16 +1,71 @@
 name: Tests
 
 on:
+  # Pull requests run once (pull_request); a push runs only on main, after the merge.
   push:
+    branches: [main]
   pull_request:
 
+# A newer commit on a pull request replaces the run in progress. A push to main gets a group of its own, so it is never
+# cancelled or left waiting: each run compares only its own push, and a docs push right after a code push would
+# otherwise cancel the only run that tests the code.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
+  # Whether anything but docs, Markdown and the release plumbing changed. When nothing did, the test jobs skip and
+  # "Tests passed" still reports (a required check must report, so no paths-ignore on the workflow). Anything not on
+  # the list counts as code, so a new kind of file runs the tests.
+  changes:
+    name: What changed
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+
+    steps:
+      # Two commits are enough: a pull request is checked out as its merge commit, whose first parent is the base.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+
+      - name: Compare with the base
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            # The merge commit against main as it is now: exactly what merging would change, wherever the branch started
+            # (the event's base.sha can be older than the main the merge commit was made with).
+            base=""
+            if git rev-parse -q --verify "HEAD^2" >/dev/null; then base="HEAD^1"; fi
+          else
+            # A push to main: everything since the commit main pointed at before, fetched on its own (no history needed).
+            base="$BEFORE"
+            if [ -n "$base" ]; then git fetch --quiet --no-tags --depth=1 origin "$base" 2>/dev/null || true; fi
+          fi
+          # No base to compare with (a new branch, a force push that dropped it): run everything.
+          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "No base to compare with: the tests run."
+            echo "code=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # --no-renames: a file moved onto the list (src/Foo.php to docs/foo.md) still shows its old path.
+          git diff --name-only --no-renames "$base" HEAD > "$RUNNER_TEMP/changed.txt"
+          echo "Changed since $(git rev-parse --short "$base"):"; cat "$RUNNER_TEMP/changed.txt"
+          skip='^(docs/|art/|.*\.md$|\.github/((release|dependabot|FUNDING)\.yml$|ISSUE_TEMPLATE/|workflows/(release|github-release|docs-sync|add-to-project|dependabot-auto-merge|fix-php-code-style-issues|package-health)\.yml$))'
+          if grep -qvE "$skip" "$RUNNER_TEMP/changed.txt"; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Only docs, Markdown or release plumbing changed: the tests skip."
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
   tests:
     name: Tests (PHP ${{ matrix.php }}, Laravel ${{ matrix.laravel }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
 
     strategy:
@@ -66,15 +121,21 @@ jobs:
   tests-passed:
     name: Tests passed
     if: always()
-    needs: [tests]
+    needs: [changes, tests]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fail unless every job succeeded
+      # Every job succeeded, or the test jobs skipped because only docs changed (never skipped for another reason).
+      - name: Fail unless every job succeeded or skipped for docs
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
+          CHANGES: ${{ needs.changes.result }}
+          CODE: ${{ needs.changes.outputs.code }}
         run: |
-          echo "Job results: $RESULTS"
+          echo "Job results: $RESULTS (code changed: $CODE)"
+          [ "$CHANGES" = "success" ] || exit 1
           for result in $RESULTS; do
-            [ "$result" = "success" ] || exit 1
+            if [ "$result" = "success" ]; then continue; fi
+            if [ "$result" = "skipped" ] && [ "$CODE" = "false" ]; then continue; fi
+            exit 1
           done
